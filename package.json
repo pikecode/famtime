@@ -1,0 +1,19 @@
+{
+  "name": "famtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "家庭共享日历微信小程序",
+  "scripts": {
+    "dev:miniapp": "pnpm --filter miniapp dev:weapp",
+    "build:miniapp": "pnpm --filter miniapp build:weapp",
+    "dev:server": "pnpm --filter server start:dev",
+    "build:server": "pnpm --filter server build",
+    "db:generate": "pnpm --filter server prisma:generate",
+    "db:migrate": "pnpm --filter server prisma:migrate",
+    "db:studio": "pnpm --filter server prisma:studio"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

@@ -1,0 +1,392 @@
+.family-page {
+  min-height: 100vh;
+  background: #F8F9FA;
+  padding-bottom: 240px;
+
+  &.no-family {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+}
+
+// ============ 无家庭状态 ============
+.welcome-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120px 40px 60px;
+  background: #fff;
+  border-radius: 0 0 80px 80px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.02);
+}
+
+.welcome-icon {
+  font-size: 160px;
+  margin-bottom: 48px;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+}
+
+.welcome-title {
+  font-size: 48px;
+  font-weight: 800;
+  color: #212529;
+  margin-bottom: 24px;
+}
+
+.welcome-desc {
+  font-size: 30px;
+  color: #ADB5BD;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 80%;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 48px 40px;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 40px;
+  border-radius: 40px;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #339AF0, #228BE6);
+  box-shadow: 0 12px 32px rgba(51, 154, 240, 0.3);
+
+  .btn-icon {
+    font-size: 64px;
+  }
+
+  .btn-title {
+    color: #fff;
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  .btn-desc {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 26px;
+    margin-top: 6px;
+  }
+}
+
+.secondary-btn {
+  background: #fff;
+  border: 2px solid #F1F3F5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+
+  .btn-icon {
+    font-size: 64px;
+  }
+
+  .btn-title {
+    color: #212529;
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  .btn-desc {
+    color: #ADB5BD;
+    font-size: 26px;
+    margin-top: 6px;
+  }
+}
+
+// ============ 有家庭状态 ============
+.family-header {
+  background: linear-gradient(135deg, #339AF0, #228BE6);
+  padding: 100px 40px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -10%;
+    width: 120%;
+    height: 100px;
+    background: #F8F9FA;
+    border-radius: 100% 100% 0 0;
+  }
+}
+
+.family-avatar {
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  transform: rotate(-5deg);
+}
+
+.avatar-icon {
+  font-size: 80px;
+}
+
+.family-name {
+  font-size: 48px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.member-count {
+  font-size: 28px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+// ============ 区块通用样式 ============
+.section {
+  background: #fff;
+  margin: 32px 24px;
+  padding: 40px;
+  border-radius: 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+
+  &.pending-section {
+    margin-top: -80px;
+    position: relative;
+    z-index: 2;
+    background: #fff;
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #212529;
+}
+
+.section-action {
+  font-size: 28px;
+  color: #339AF0;
+  font-weight: 600;
+  background: #E7F5FF;
+  padding: 8px 24px;
+  border-radius: 12px;
+}
+
+.badge {
+  background: #FF6B6B;
+  color: #fff;
+  font-size: 22px;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+// ============ 待处理列表 ============
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pending-card {
+  background: #FFF9F0;
+  border: 1px solid #FFE8CC;
+  border-radius: 32px;
+  padding: 32px;
+}
+
+.pending-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #212529;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.pending-meta {
+  font-size: 26px;
+  color: #F59F00;
+  font-weight: 500;
+}
+
+.pending-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.action-btn {
+  flex: 1;
+  height: 88px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text {
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  &.accept {
+    background: #339AF0;
+    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.2);
+    text { color: #fff; }
+  }
+
+  &.reject {
+    background: #fff;
+    border: 1px solid #FFE8CC;
+    text { color: #ADB5BD; }
+  }
+}
+
+// ============ 成员网格 ============
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px 20px;
+}
+
+.member-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.member-avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.avatar-initial {
+  font-size: 40px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.member-name {
+  font-size: 26px;
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.admin-tag {
+  background: rgba(51, 154, 240, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+
+  text {
+    font-size: 20px;
+    color: #339AF0;
+    font-weight: 700;
+  }
+}
+
+.add-member {
+  .add-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 40px;
+    background: #F8F9FA;
+    border: 2px dashed #DEE2E6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .add-icon {
+    font-size: 48px;
+    color: #ADB5BD;
+    font-weight: 300;
+  }
+
+  .add-text {
+    font-size: 26px;
+    color: #ADB5BD;
+    font-weight: 500;
+  }
+}
+
+// ============ 快捷操作 ============
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.quick-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 24px;
+  background: #F8F9FA;
+  border-radius: 32px;
+  transition: all 0.2s;
+
+  &:active {
+    background: #E9ECEF;
+    transform: translateY(4px);
+  }
+}
+
+.action-icon {
+  font-size: 56px;
+}
+
+.action-text {
+  font-size: 28px;
+  color: #495057;
+  font-weight: 600;
+}
+
+// ============ 调试切换 ============
+.debug-toggle {
+  padding: 40px;
+  text-align: center;
+  opacity: 0.3;
+
+  text {
+    font-size: 24px;
+    color: #ADB5BD;
+  }
+}

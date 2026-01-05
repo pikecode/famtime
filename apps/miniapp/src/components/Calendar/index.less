@@ -1,0 +1,182 @@
+.calendar-component {
+  background: #fff;
+  border-radius: 32px;
+  padding: 24px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.02);
+  margin: 0 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px 24px;
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #ADB5BD;
+  font-weight: 300;
+  border-radius: 50%;
+  
+  &:active {
+    background: #F1F3F5;
+    color: #339AF0;
+  }
+}
+
+.current-date {
+  font-size: 34px;
+  font-weight: 700;
+  color: #212529;
+}
+
+.today-btn {
+  width: 56px;
+  height: 56px;
+  background: #E7F5FF;
+  color: #339AF0;
+  font-size: 26px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+
+  &:active {
+    transform: scale(0.92);
+    background: #D0EBFF;
+  }
+}
+
+.weekdays-row {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.weekday-label {
+  flex: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #ADB5BD;
+  text-transform: uppercase;
+
+  &.weekend {
+    color: #FF8787;
+  }
+}
+
+.days-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.day-node {
+  width: calc(100% / 7);
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 8px;
+  
+  &.inactive {
+    opacity: 0.2;
+  }
+
+  &.is-selected {
+    .day-content {
+      background: rgba(51, 154, 240, 0.08);
+      border-radius: 20px;
+    }
+  }
+
+  &.is-today {
+    .day-val {
+      background: #339AF0;
+      color: #fff;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(51, 154, 240, 0.3);
+    }
+    .lunar-val {
+      color: #339AF0;
+      font-weight: 700;
+      &.festival {
+        color: #FF6B6B;
+      }
+    }
+  }
+}
+
+.day-content {
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 8px 0;
+}
+
+.day-val {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #495057;
+  margin-bottom: 2px;
+}
+
+.lunar-val {
+  font-size: 18px;
+  color: #ADB5BD;
+  font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+
+  &.festival {
+    color: #FF6B6B;
+    font-weight: 700;
+  }
+}
+
+.event-indicators {
+  display: flex;
+  gap: 4px;
+  height: 8px;
+  align-items: center;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  &.is-pending {
+    animation: pulse-dot 1.5s infinite;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}

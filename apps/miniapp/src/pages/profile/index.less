@@ -1,0 +1,171 @@
+.profile-page {
+  min-height: 100vh;
+  background: #F8F9FA;
+  padding-bottom: 240px;
+}
+
+// ============ 用户信息 ============
+.user-section {
+  background: #fff;
+  padding: 80px 48px;
+  display: flex;
+  align-items: center;
+  border-radius: 0 0 64px 64px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.02);
+  margin-bottom: 40px;
+}
+
+.user-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 56px;
+  background: linear-gradient(135deg, #339AF0, #228BE6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 32px;
+  box-shadow: 0 12px 24px rgba(51, 154, 240, 0.2);
+}
+
+.avatar-text {
+  font-size: 64px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 44px;
+  font-weight: 800;
+  color: #212529;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.user-role {
+  font-size: 26px;
+  color: #ADB5BD;
+  font-weight: 600;
+}
+
+.edit-btn {
+  font-size: 26px;
+  color: #339AF0;
+  background: #E7F5FF;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+// ============ 内容区域 ============
+.content-area {
+  padding: 0 32px;
+}
+
+.section-card {
+  background: #fff;
+  border-radius: 48px;
+  padding: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+// ============ 设置项 ============
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 24px;
+  border-bottom: 1px solid #F8F9FA;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.setting-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #212529;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.setting-desc {
+  font-size: 24px;
+  color: #ADB5BD;
+  font-weight: 500;
+}
+
+// ============ 菜单项 ============
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32px 24px;
+  transition: all 0.2s;
+
+  &:active {
+    background: #F8F9FA;
+    border-radius: 32px;
+  }
+}
+
+.menu-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: #F8F9FA;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  margin-right: 24px;
+}
+
+.menu-info {
+  flex: 1;
+}
+
+.menu-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #495057;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.menu-desc {
+  font-size: 24px;
+  color: #CED4DA;
+  font-weight: 500;
+}
+
+.menu-arrow {
+  font-size: 40px;
+  color: #DEE2E6;
+  font-weight: 300;
+}
+
+// ============ 退出登录 ============
+.logout-btn {
+  margin-top: 40px;
+  padding: 40px;
+  text-align: center;
+  background: #FFF5F5;
+  border-radius: 40px;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+}
+
+.logout-text {
+  font-size: 32px;
+  font-weight: 700;
+  color: #FF6B6B;
+}

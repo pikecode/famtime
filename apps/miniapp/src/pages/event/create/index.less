@@ -1,0 +1,272 @@
+.create-page {
+  min-height: 100vh;
+  background: #F8F9FA;
+  padding-bottom: 240px;
+
+  &.loading {
+    padding: 32px;
+  }
+}
+
+.form-section {
+  background: #fff;
+  padding: 40px;
+  margin-bottom: 24px;
+  border-radius: 40px;
+  margin-left: 16px;
+  margin-right: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+
+  &:first-child {
+    margin-top: 24px;
+  }
+}
+
+.section-title {
+  font-size: 26px;
+  color: #ADB5BD;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+// ============ Title Input ============
+.title-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.category-hero-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.title-input {
+  flex: 1;
+  font-size: 40px;
+  font-weight: 700;
+  color: #212529;
+}
+
+// ============ Member Scroll ============
+.member-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.member-flex {
+  display: flex;
+  gap: 32px;
+  padding: 8px 0;
+}
+
+.member-avatar-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s;
+
+  &.active {
+    .avatar-circle {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 6px #E7F5FF;
+    }
+    .avatar-label {
+      color: #339AF0;
+      font-weight: 700;
+    }
+  }
+}
+
+.avatar-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  &.self {
+    background: #F1F3F5;
+    color: #868E96;
+    font-size: 32px;
+    font-weight: 700;
+  }
+}
+
+.avatar-label {
+  font-size: 24px;
+  color: #ADB5BD;
+}
+
+// ============ Form Items ============
+.form-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid #F8F9FA;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-label {
+  font-size: 32px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.item-value {
+  font-size: 30px;
+  color: #339AF0;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arrow {
+  font-size: 32px;
+  color: #DEE2E6;
+}
+
+// ============ Time Range ============
+.time-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.time-box {
+  background: #F8F9FA;
+  padding: 24px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.time-label {
+  font-size: 22px;
+  color: #ADB5BD;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.time-val {
+  font-size: 36px;
+  font-weight: 800;
+  color: #212529;
+}
+
+.time-sep {
+  font-size: 28px;
+  color: #DEE2E6;
+  font-weight: 700;
+}
+
+// ============ Chips ============
+.category-chips, .reminder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.category-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-radius: 20px;
+  transition: all 0.2s;
+
+  &.active {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.chip-icon {
+  font-size: 32px;
+}
+
+.chip-label {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.rem-chip {
+  padding: 12px 24px;
+  background: #F8F9FA;
+  border-radius: 12px;
+  font-size: 24px;
+  color: #868E96;
+  font-weight: 600;
+
+  &.active {
+    background: #E7F5FF;
+    color: #339AF0;
+  }
+}
+
+// ============ Toggle Group ============
+.toggle-group {
+  display: flex;
+  background: #F1F3F5;
+  padding: 6px;
+  border-radius: 16px;
+}
+
+.toggle-opt {
+  padding: 12px 24px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ADB5BD;
+  border-radius: 12px;
+
+  &.active {
+    background: #fff;
+    color: #339AF0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+}
+
+// ============ MemoArea ============
+.memo-area {
+  width: 100%;
+  height: 200px;
+  font-size: 28px;
+  color: #495057;
+  padding: 0;
+}
+
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  z-index: 100;
+}
+
+.w-full {
+  width: 100%;
+}

@@ -1,0 +1,205 @@
+import { View, Text, ScrollView } from '@tarojs/components';
+import { useState, useEffect, useMemo } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { EventStatus, Event } from '@famtime/shared';
+import Calendar from '../../components/Calendar';
+import EventCard from '../../components/EventCard';
+import Skeleton from '../../components/Skeleton';
+import { getEvents } from '../../services/api';
+import { useUserStore } from '../../stores/user';
+import './index.less';
+
+// ============ 工具函数 ============
+const formatDate = (year: number, month: number, day: number) => {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+export default function CalendarPage() {
+  const [loading, setLoading] = useState(true);
+  const [eventsMap, setEventsMap] = useState<Record<string, Event[]>>({});
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [selectedDate, setSelectedDate] = useState(
+    formatDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+  );
+
+  const family = useUserStore((state) => state.family);
+
+  // 当页面显示或家庭/月份变化时，拉取数据
+  useDidShow(() => {
+    fetchMonthEvents();
+  });
+
+  useEffect(() => {
+    fetchMonthEvents();
+  }, [currentYear, currentMonth, family?.id]);
+
+  const fetchMonthEvents = async () => {
+    if (!family?.id) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // 获取当前月及前后一个月的范围以覆盖日历显示
+      const startDate = formatDate(currentYear, currentMonth - 1, 1);
+      const endDate = formatDate(currentYear, currentMonth + 1, 31);
+      
+      const events = await getEvents({
+        familyId: family.id,
+        startDate,
+        endDate,
+      });
+
+      // 将事件按日期进行归档
+      const map: Record<string, Event[]> = {};
+      events.forEach((event) => {
+        const dateKey = new Date(event.startTime).toISOString().split('T')[0];
+        if (!map[dateKey]) map[dateKey] = [];
+        map[dateKey].push(event);
+      });
+
+      setEventsMap(map);
+    } catch (e) {
+      console.error('Fetch events failed', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectedDateEvents = useMemo(() => {
+    return eventsMap[selectedDate] || [];
+  }, [eventsMap, selectedDate]);
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const handleToday = () => {
+    const today = new Date();
+    Taro.vibrateShort({ type: 'medium' });
+    setCurrentYear(today.getFullYear());
+    setCurrentMonth(today.getMonth());
+    setSelectedDate(formatDate(today.getFullYear(), today.getMonth(), today.getDate()));
+  };
+
+  const handleDayClick = (day: number) => {
+    setSelectedDate(formatDate(currentYear, currentMonth, day));
+  };
+
+  const handleCreateEvent = () => {
+    Taro.vibrateShort({ type: 'medium' });
+    Taro.navigateTo({ url: `/pages/event/create/index?date=${selectedDate}` });
+  };
+
+  const handleEventClick = (eventId: string) => {
+    Taro.navigateTo({ url: `/pages/event/detail/index?id=${eventId}` });
+  };
+
+  return (
+    <View className="calendar-page">
+      <View className="top-section">
+        {loading ? (
+          <View className="calendar-skeleton">
+            <Skeleton height={600} width="100%" />
+          </View>
+        ) : (
+          <Calendar
+            currentYear={currentYear}
+            currentMonth={currentMonth}
+            selectedDate={selectedDate}
+            events={eventsMap}
+            onDayClick={handleDayClick}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+            onTodayClick={handleToday}
+          />
+        )}
+      </View>
+
+      <View className="event-section">
+        <View className="section-header">
+          <View className="title-area">
+            <Text className="section-title">
+              {selectedDate === formatDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                ? '今日日程'
+                : '日程详情'}
+            </Text>
+            <Text className="date-subtitle">
+              {selectedDate.split('-')[1]}月{selectedDate.split('-')[2]}日
+            </Text>
+          </View>
+          {loading ? (
+            <Skeleton height={40} width={120} />
+          ) : (
+            <Text className="event-count">
+              {selectedDateEvents.length > 0 ? `${selectedDateEvents.length} 条日程` : '暂无日程'}
+            </Text>
+          )}
+        </View>
+
+        <ScrollView scrollY className="event-list-scroll">
+          {!family?.id ? (
+            <View className="empty-state">
+              <View className="empty-icon-wrapper">
+                <Text className="empty-emoji">🏠</Text>
+              </View>
+              <Text className="empty-text">尚未加入家庭</Text>
+              <Text className="empty-hint">请前往“家庭”频道创建或加入</Text>
+            </View>
+          ) : loading ? (
+            <View className="cards-container">
+              <Skeleton height={180} count={3} width="100%" className="mb-20" />
+            </View>
+          ) : selectedDateEvents.length === 0 ? (
+            <View className="empty-state">
+              <View className="empty-icon-wrapper">
+                <Text className="empty-emoji">🍃</Text>
+              </View>
+              <Text className="empty-text">今天也是轻松的一天呢</Text>
+              <Text className="empty-hint">点击右下角按钮添加新日程</Text>
+            </View>
+          ) : (
+            <View className="cards-container">
+              {selectedDateEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  id={event.id}
+                  title={event.title}
+                  description={event.description}
+                  startTime={new Date(event.startTime)}
+                  endTime={event.endTime ? new Date(event.endTime) : undefined}
+                  category={event.category}
+                  status={event.status}
+                  creatorName="家庭成员" // 实际应从成员列表匹配
+                  isAllDay={event.isAllDay}
+                  onClick={handleEventClick}
+                />
+              ))}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+
+      {family?.id && !loading && (
+        <View className="fab-button" onClick={handleCreateEvent}>
+          <Text className="fab-plus">+</Text>
+        </View>
+      )}
+    </View>
+  );
+}

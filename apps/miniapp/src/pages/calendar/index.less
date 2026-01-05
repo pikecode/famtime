@@ -1,0 +1,135 @@
+.calendar-page {
+  min-height: 100vh;
+  background: #F8F9FA;
+  padding-bottom: 240px;
+}
+
+.top-section {
+  padding: 24px 0;
+  background: #fff;
+  border-radius: 0 0 48px 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  margin-bottom: 24px;
+}
+
+.calendar-skeleton {
+  padding: 0 32px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+// ============ 事件部分 ============
+.event-section {
+  padding: 0 32px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  padding: 0 8px;
+}
+
+.title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-title {
+  font-size: 40px;
+  font-weight: 700;
+  color: #212529;
+}
+
+.date-subtitle {
+  font-size: 26px;
+  color: #ADB5BD;
+  font-weight: 500;
+}
+
+.event-count {
+  font-size: 24px;
+  color: #339AF0;
+  background: #E7F5FF;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.event-list-scroll {
+  height: calc(100vh - 900px);
+}
+
+.cards-container {
+  padding-bottom: 40px;
+}
+
+// ============ 空状态 ============
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 100px;
+}
+
+.empty-icon-wrapper {
+  width: 160px;
+  height: 160px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+
+.empty-emoji {
+  font-size: 80px;
+}
+
+.empty-text {
+  font-size: 32px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 12px;
+}
+
+.empty-hint {
+  font-size: 26px;
+  color: #ADB5BD;
+}
+
+// ============ 悬浮按钮 ============
+.fab-button {
+  position: fixed;
+  right: 48px;
+  bottom: 180px;
+  width: 120px;
+  height: 120px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, #339AF0, #228BE6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 32px rgba(51, 154, 240, 0.4);
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:active {
+    transform: scale(0.9) translateY(4px);
+    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.3);
+  }
+}
+
+.fab-plus {
+  font-size: 64px;
+  color: #fff;
+  font-weight: 300;
+  line-height: 1;
+}
