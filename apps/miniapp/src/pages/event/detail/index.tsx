@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Taro, { useRouter } from '@tarojs/taro';
 import { EventCategory, EventColors, EventStatus, Visibility, Event } from '@famtime/shared';
 import { getEvent, acceptEvent, rejectEvent, deleteEvent } from '../../../services/api';
+import CommentList from '../../../components/CommentList';
 import './index.less';
 
 const categoryLabels: Record<EventCategory, string> = {
@@ -209,6 +210,11 @@ export default function EventDetailPage() {
           </View>
         </View>
       )}
+
+      {/* 评论区 */}
+      <View className="info-section">
+        <CommentList eventId={event.id} />
+      </View>
 
       {/* 底部操作栏 */}
       <View className="action-bar">

@@ -24,6 +24,7 @@ model User {
   createdEvents   Event[]        @relation("EventCreator")
   assignedEvents  Event[]        @relation("EventAssignee")
   reminderPrefs   ReminderPreference?
+  comments        EventComment[]
 
   @@map("users")
 }
@@ -105,6 +106,7 @@ model Event {
 
   // 提醒
   reminders EventReminder[]
+  comments  EventComment[]
 
   @@index([familyId, startTime])
   @@index([assigneeId, status])
@@ -143,6 +145,23 @@ model ReminderPreference {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reminder_preferences")
+}
+
+// 事件评论表
+model EventComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关系
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, createdAt])
+  @@map("event_comments")
 }
 
 // 枚举类型

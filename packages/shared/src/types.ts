@@ -140,6 +140,21 @@ export interface Event {
   updatedAt: Date;
 }
 
+/** 事件评论 */
+export interface EventComment {
+  id: string;
+  eventId: string;
+  userId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user?: {
+    id: string;
+    nickname: string;
+    avatar?: string;
+  };
+}
+
 // ============ API 请求/响应类型 ============
 
 /** 创建家庭请求 */
@@ -178,6 +193,12 @@ export interface QueryEventsDto {
   startDate: string;  // YYYY-MM-DD
   endDate: string;
   status?: EventStatus;
+}
+
+/** 创建评论请求 */
+export interface CreateCommentDto {
+  eventId: string;
+  content: string;
 }
 
 /** API 统一响应格式 */
