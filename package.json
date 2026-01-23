@@ -10,7 +10,13 @@
     "build:server": "pnpm --filter server build",
     "db:generate": "pnpm --filter server prisma:generate",
     "db:migrate": "pnpm --filter server prisma:migrate",
-    "db:studio": "pnpm --filter server prisma:studio"
+    "db:studio": "pnpm --filter server prisma:studio",
+    "db:push": "pnpm --filter server prisma:push",
+    "db:init": "bash scripts/init-db.sh",
+    "setup": "pnpm install && pnpm db:generate",
+    "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:miniapp\"",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
   },
   "engines": {
     "node": ">=18.0.0",
