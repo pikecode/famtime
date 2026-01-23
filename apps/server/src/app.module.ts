@@ -7,6 +7,7 @@ import { FamilyModule } from './modules/family/family.module';
 import { MemberModule } from './modules/member/member.module';
 import { EventModule } from './modules/event/event.module';
 import { ReminderModule } from './modules/reminder/reminder.module';
+import { MemoryModule } from './modules/memory/memory.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ReminderModule } from './modules/reminder/reminder.module';
     MemberModule,
     EventModule,
     ReminderModule,
+    MemoryModule,
   ],
 })
 export class AppModule {}

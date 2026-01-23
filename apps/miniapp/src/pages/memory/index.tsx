@@ -1,8 +1,9 @@
-import { View, Text } from '@tarojs/components';
+import { View, Text, ScrollView } from '@tarojs/components';
 import { useState, useEffect } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
+import { FamilyMemory } from '@famtime/shared';
 import { useUserStore } from '../../stores/user';
-import { getThisDayMemories, getMonthlySummary } from '../../services/api';
+import MemoryCard from '../../components/MemoryCard';
 import './index.less';
 
 interface MemoryEvent {
@@ -14,134 +15,155 @@ interface MemoryEvent {
 
 export default function MemoryPage() {
   const family = useUserStore((state) => state.family);
-  const [activeTab, setActiveTab] = useState<'thisDay' | 'summary'>('thisDay');
-  const [thisDayMemories, setThisDayMemories] = useState<MemoryEvent[]>([]);
-  const [monthlySummary, setMonthlySummary] = useState<any>(null);
+  const [memories, setMemories] = useState<FamilyMemory[]>([]);
   const [loading, setLoading] = useState(true);
 
   useDidShow(() => {
     if (family?.id) {
-      fetchData();
+      fetchMemories();
     }
   });
 
-  const fetchData = async () => {
+  const fetchMemories = async () => {
     setLoading(true);
     try {
-      const now = new Date();
-      const [memories, summary] = await Promise.all([
-        getThisDayMemories(family!.id),
-        getMonthlySummary(family!.id, now.getFullYear(), now.getMonth() + 1)
-      ]);
-      setThisDayMemories(memories as any);
-      setMonthlySummary(summary);
+      // TODO: 实际 API 调用
+      // const data = await getFamilyMemories(family!.id);
+      // setMemories(data);
+
+      // Mock 数据
+      const mockMemories: FamilyMemory[] = [
+        {
+          id: '1',
+          familyId: family!.id,
+          type: 'monthly' as any,
+          period: '2024-01',
+          title: '2024年1月的美好时光',
+          summary: '这个月，我们庆祝了2个生日，进行了5次家庭活动，完成了3次健康记录。共记录了15个珍贵时刻，每一个都值得回味。',
+          eventCount: 15,
+          highlights: [
+            {
+              eventId: '1',
+              title: '小明的生日派对',
+              date: '2024-01-15',
+              category: 'birthday' as any,
+            },
+            {
+              eventId: '2',
+              title: '全家去公园野餐',
+              date: '2024-01-20',
+              category: 'family_activity' as any,
+            },
+            {
+              eventId: '3',
+              title: '爸爸体检',
+              date: '2024-01-25',
+              category: 'health' as any,
+            },
+          ],
+          createdAt: new Date('2024-02-01'),
+          updatedAt: new Date('2024-02-01'),
+        },
+        {
+          id: '2',
+          familyId: family!.id,
+          type: 'monthly' as any,
+          period: '2023-12',
+          title: '2023年12月的美好时光',
+          summary: '这个月，我们庆祝了1个生日，纪念了2个特殊日子，进行了8次家庭活动。共记录了20个珍贵时刻，每一个都值得回味。',
+          eventCount: 20,
+          highlights: [
+            {
+              eventId: '4',
+              title: '圣诞节家庭聚会',
+              date: '2023-12-25',
+              category: 'family_activity' as any,
+            },
+            {
+              eventId: '5',
+              title: '结婚纪念日',
+              date: '2023-12-10',
+              category: 'anniversary' as any,
+            },
+          ],
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+        },
+      ];
+
+      setMemories(mockMemories);
     } catch (e) {
-      console.error('Fetch memory data failed', e);
+      console.error('Fetch memories failed', e);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleTabChange = (tab: 'thisDay' | 'summary') => {
-    Taro.vibrateShort({ type: 'light' });
-    setActiveTab(tab);
+  const handleMemoryClick = (memory: FamilyMemory) => {
+    Taro.showToast({ title: '回忆详情即将上线', icon: 'none' });
+  };
+
+  const handleGenerateMemory = () => {
+    Taro.vibrateShort({ type: 'medium' });
+    Taro.showModal({
+      title: '生成回忆录',
+      content: '是否为本月生成回忆录？',
+      success: (res) => {
+        if (res.confirm) {
+          Taro.showToast({ title: '生成中...', icon: 'loading' });
+          // TODO: 调用生成 API
+          setTimeout(() => {
+            Taro.showToast({ title: '生成成功', icon: 'success' });
+            fetchMemories();
+          }, 1500);
+        }
+      },
+    });
   };
 
   if (!family?.id) {
-    return <View className="memory-page empty"><Text>请先加入家庭以查看回忆</Text></View>;
+    return (
+      <View className="memory-page empty">
+        <View className="empty-state">
+          <Text className="empty-icon">💭</Text>
+          <Text className="empty-title">还没有家庭</Text>
+          <Text className="empty-desc">请先加入家庭以查看回忆</Text>
+        </View>
+      </View>
+    );
   }
 
   return (
     <View className="memory-page">
-      {/* Tab 切换 */}
-      <View className="tabs-container">
-        <View className="tabs-pill">
-          <View
-            className={`tab-item ${activeTab === 'thisDay' ? 'active' : ''}`}
-            onClick={() => handleTabChange('thisDay')}
-          >
-            <Text>去年今天</Text>
-          </View>
-          <View
-            className={`tab-item ${activeTab === 'summary' ? 'active' : ''}`}
-            onClick={() => handleTabChange('summary')}
-          >
-            <Text>时光总结</Text>
-          </View>
+      <View className="page-header">
+        <Text className="page-title">家庭回忆录</Text>
+        <View className="generate-btn" onClick={handleGenerateMemory}>
+          <Text>✨ 生成本月回忆</Text>
         </View>
       </View>
 
-      {activeTab === 'thisDay' ? (
-        <View className="this-day-section">
-          {thisDayMemories.length === 0 ? (
-            <View className="empty-state">
-              <Text className="empty-icon">📅</Text>
-              <Text className="empty-title">去年的今天</Text>
-              <Text className="empty-desc">还没有记录，开始创造回忆吧</Text>
-            </View>
-          ) : (
-            <View className="memory-list">
-              <Text className="memory-date">去年的今天</Text>
-              {thisDayMemories.map((memory) => (
-                <View key={memory.id} className="memory-card">
-                  <View className="memory-header">
-                    <Text className="memory-title">{memory.title}</Text>
-                    <Text className="memory-time">{new Date(memory.startTime).getFullYear()}年</Text>
-                  </View>
-                  {memory.description && (
-                    <Text className="memory-desc">{memory.description}</Text>
-                  )}
-                </View>
-              ))}
-            </View>
-          )}
+      {loading ? (
+        <View className="loading-state">
+          <Text>加载中...</Text>
+        </View>
+      ) : memories.length === 0 ? (
+        <View className="empty-state">
+          <Text className="empty-icon">📖</Text>
+          <Text className="empty-title">还没有回忆录</Text>
+          <Text className="empty-desc">点击上方按钮生成第一份回忆录吧</Text>
         </View>
       ) : (
-        <View className="summary-section">
-          {/* 情感化文案 */}
-          <View className="summary-hero">
-            <Text className="hero-title">本月家庭时光</Text>
-            <Text className="hero-desc">
-              这个月，你们共创造了 {monthlySummary?.familyTime || 0} 个温暖时刻
-            </Text>
+        <ScrollView scrollY className="memories-scroll">
+          <View className="memories-list">
+            {memories.map((memory) => (
+              <MemoryCard
+                key={memory.id}
+                memory={memory}
+                onClick={handleMemoryClick}
+              />
+            ))}
           </View>
-
-          {/* 数据统计 */}
-          <View className="stats-grid">
-            <View className="stat-card">
-              <Text className="stat-number">{monthlySummary?.totalEvents || 0}</Text>
-              <Text className="stat-label">总事件</Text>
-            </View>
-            <View className="stat-card">
-              <Text className="stat-number">{monthlySummary?.familyTime || 0}</Text>
-              <Text className="stat-label">共度时光</Text>
-            </View>
-            <View className="stat-card">
-              <Text className="stat-number">{monthlySummary?.importantDays || 0}</Text>
-              <Text className="stat-label">重要纪念</Text>
-            </View>
-            <View className="stat-card">
-              <Text className="stat-number">{monthlySummary?.pendingCount || 0}</Text>
-              <Text className="stat-label">待完成</Text>
-            </View>
-          </View>
-
-          {/* 快捷入口 */}
-          <View className="quick-links">
-            <View className="quick-link">
-              <Text className="link-text">查看周总结</Text>
-              <Text className="link-arrow">›</Text>
-            </View>
-            <View className="quick-link">
-              <Text className="link-text">查看月总结</Text>
-              <Text className="link-arrow">›</Text>
-            </View>
-            <View className="quick-link">
-              <Text className="link-text">年度回顾</Text>
-              <Text className="link-arrow">›</Text>
-            </View>
-          </View>
-        </View>
+        </ScrollView>
       )}
     </View>
   );

@@ -47,6 +47,7 @@ model Family {
   // 关系
   members FamilyMember[]
   events  Event[]
+  memories FamilyMemory[]
 
   @@map("families")
 }
@@ -164,6 +165,28 @@ model EventComment {
   @@map("event_comments")
 }
 
+// 家庭回忆录表
+model FamilyMemory {
+  id        String   @id @default(cuid())
+  type      MemoryType @default(MONTHLY)
+  period    String   // "2024-01" for monthly, "2024" for yearly
+  title     String
+  summary   String   @db.Text
+  coverImage String?
+  eventCount Int     @default(0)
+  highlights Json    @default("[]") // 重要事件摘要
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关系
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, type, period])
+  @@index([familyId, period])
+  @@map("family_memories")
+}
+
 // 枚举类型
 enum MemberRole {
   ADMIN
@@ -194,4 +217,10 @@ enum EventStatus {
 enum ReminderType {
   AT_TIME
   BEFORE
+}
+
+enum MemoryType {
+  MONTHLY
+  YEARLY
+  ANNIVERSARY
 }

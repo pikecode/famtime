@@ -54,6 +54,13 @@ export enum ReminderType {
   BEFORE = 'before',       // 提前提醒
 }
 
+/** 回忆类型 */
+export enum MemoryType {
+  MONTHLY = 'monthly',       // 月度回忆
+  YEARLY = 'yearly',         // 年度回忆
+  ANNIVERSARY = 'anniversary', // 纪念日回忆
+}
+
 // ============ 接口定义 ============
 
 /** 家庭 */
@@ -153,6 +160,26 @@ export interface EventComment {
     nickname: string;
     avatar?: string;
   };
+}
+
+/** 家庭回忆录 */
+export interface FamilyMemory {
+  id: string;
+  familyId: string;
+  type: MemoryType;
+  period: string; // "2024-01" or "2024"
+  title: string;
+  summary: string;
+  coverImage?: string;
+  eventCount: number;
+  highlights: Array<{
+    eventId: string;
+    title: string;
+    date: string;
+    category: EventCategory;
+  }>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============ API 请求/响应类型 ============
