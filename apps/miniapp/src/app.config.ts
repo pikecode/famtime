@@ -10,6 +10,7 @@ export default defineAppConfig({
     'pages/family/create/index',
     'pages/family/join/index',
     'pages/family/invite/index',
+    'pages/notification/index',
   ],
   window: {
     backgroundTextStyle: 'light',

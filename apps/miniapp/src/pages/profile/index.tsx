@@ -55,10 +55,10 @@ export default function ProfilePage() {
 
   const menuItems = [
     {
-      title: '提醒设置',
-      desc: '设置提醒时间和免打扰',
+      title: '消息通知',
+      desc: '管理消息推送设置',
       icon: '🔔',
-      onClick: () => Taro.showToast({ title: '提醒设置即将上线', icon: 'none' }),
+      onClick: () => Taro.navigateTo({ url: '/pages/notification/index' }),
     },
     {
       title: '家庭设置',

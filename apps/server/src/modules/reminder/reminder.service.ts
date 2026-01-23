@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class ReminderService {
   private readonly logger = new Logger(ReminderService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
   // 每分钟检查需要发送的提醒
   @Cron(CronExpression.EVERY_MINUTE)
@@ -54,29 +58,32 @@ export class ReminderService {
     }
   }
 
-  // 发送提醒（实际发送微信订阅消息）
+  // 发送提醒（调用微信订阅消息）
   private async sendReminder(reminder: any) {
     const { event } = reminder;
     const targetUser = event.assignee || event.creator;
 
-    // TODO: 调用微信订阅消息 API
-    // 这里需要用户授权订阅消息
+    if (!targetUser) {
+      this.logger.warn(`No target user for event: ${event.title}`);
+      return;
+    }
 
-    this.logger.log(
-      `[Mock] Sending reminder to ${targetUser.nickname} for event: ${event.title}`,
+    // 格式化时间
+    const eventTime = event.startTime.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // 发送微信订阅消息
+    await this.notificationService.sendEventReminder(
+      targetUser.id,
+      event.title,
+      eventTime,
+      event.id,
     );
-
-    // 实际实现示例：
-    // await this.wechatService.sendSubscribeMessage({
-    //   touser: targetUser.openid,
-    //   template_id: 'your-template-id',
-    //   page: `/pages/event/detail/index?id=${event.id}`,
-    //   data: {
-    //     thing1: { value: event.title },
-    //     time2: { value: event.startTime.toLocaleString() },
-    //     thing3: { value: event.family.name },
-    //   },
-    // });
   }
 
   // 获取去年今天的事件

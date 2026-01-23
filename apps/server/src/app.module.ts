@@ -9,6 +9,7 @@ import { MemberModule } from './modules/member/member.module';
 import { EventModule } from './modules/event/event.module';
 import { ReminderModule } from './modules/reminder/reminder.module';
 import { MemoryModule } from './modules/memory/memory.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
 @Module({
@@ -25,6 +26,7 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
     EventModule,
     ReminderModule,
     MemoryModule,
+    NotificationModule,
   ],
   providers: [
     {
