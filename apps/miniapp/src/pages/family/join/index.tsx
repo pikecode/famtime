@@ -100,17 +100,19 @@ export default function FamilyJoinPage() {
       ) : (
         <>
           {/* 家庭信息展示 */}
-          <View className="family-preview">
-            <View className="family-card">
-              <View className="family-icon">
-                <Text>{familyInfo?.icon}</Text>
+          {familyInfo && (
+            <View className="family-preview">
+              <View className="family-card">
+                <View className="family-icon">
+                  <Text>{familyInfo.icon}</Text>
+                </View>
+                <Text className="family-name">{familyInfo.name}</Text>
+                <Text className="family-member-count">
+                  已有 {familyInfo.memberCount} 位成员
+                </Text>
               </View>
-              <Text className="family-name">{familyInfo?.name}</Text>
-              <Text className="family-member-count">
-                已有 {familyInfo?.memberCount} 位成员
-              </Text>
             </View>
-          </View>
+          )}
 
           {/* 昵称输入 */}
           <View className="form-section">

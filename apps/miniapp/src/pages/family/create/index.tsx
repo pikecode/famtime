@@ -10,7 +10,7 @@ const FAMILY_ICONS = ['👨‍👩‍👧‍👦', '🏠', '❤️', '🌟', '�
 export default function FamilyCreatePage() {
   const setFamily = useUserStore((state) => state.setFamily);
   const [familyName, setFamilyName] = useState('');
-  const [selectedIcon] = useState('👨‍👩‍👧‍👦'); // 实际后端目前可能只支持名称，这里保留UI
+  const [selectedIcon, setSelectedIcon] = useState('👨‍👩‍👧‍👦'); // 实际后端目前可能只支持名称，这里保留UI
 
   const handleCreate = async () => {
     if (!familyName.trim()) {

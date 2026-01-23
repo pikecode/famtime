@@ -1,0 +1,107 @@
+.recurrence-picker {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+
+  .picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32rpx;
+    cursor: pointer;
+
+    .label {
+      font-size: 32rpx;
+      font-weight: 500;
+      color: #212529;
+    }
+
+    .value-area {
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+
+      .value {
+        font-size: 28rpx;
+        color: #339AF0;
+      }
+
+      .arrow {
+        font-size: 24rpx;
+        color: #ADB5BD;
+      }
+    }
+  }
+
+  .picker-detail {
+    padding: 0 32rpx 32rpx;
+    border-top: 1rpx solid #E9ECEF;
+
+    .detail-section {
+      margin-top: 32rpx;
+
+      &:first-child {
+        margin-top: 24rpx;
+      }
+
+      .section-label {
+        display: block;
+        font-size: 28rpx;
+        color: #868E96;
+        margin-bottom: 20rpx;
+      }
+
+      .type-chips,
+      .weekday-chips,
+      .end-type-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16rpx;
+      }
+
+      .type-chip,
+      .weekday-chip,
+      .end-chip {
+        padding: 16rpx 32rpx;
+        background: #F8F9FA;
+        border-radius: 12rpx;
+        font-size: 28rpx;
+        color: #495057;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &.active {
+          background: #339AF0;
+          color: #fff;
+          transform: scale(1.05);
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+
+      .weekday-chip {
+        flex: 0 0 calc((100% - 96rpx) / 7);
+        text-align: center;
+        padding: 20rpx 0;
+      }
+
+      .date-picker-btn,
+      .count-picker-btn {
+        margin-top: 20rpx;
+        padding: 24rpx 32rpx;
+        background: #F8F9FA;
+        border-radius: 12rpx;
+        text-align: center;
+        font-size: 28rpx;
+        color: #339AF0;
+        cursor: pointer;
+
+        &:active {
+          background: #E9ECEF;
+        }
+      }
+    }
+  }
+}

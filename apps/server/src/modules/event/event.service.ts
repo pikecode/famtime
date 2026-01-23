@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventStatus, EventCategory, Visibility } from '@prisma/client';
+import { RecurrenceService, RecurrenceRule } from './recurrence.service';
 
 interface CreateEventDto {
   familyId: string;
@@ -16,7 +17,7 @@ interface CreateEventDto {
   category: EventCategory;
   visibility: Visibility;
   assigneeId?: string;
-  recurrence?: object;
+  recurrence?: RecurrenceRule;
   reminders: Array<{ type: string; beforeMinutes?: number }>;
 }
 
@@ -24,7 +25,10 @@ interface UpdateEventDto extends Partial<CreateEventDto> {}
 
 @Injectable()
 export class EventService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private recurrenceService: RecurrenceService,
+  ) {}
 
   // 创建事件
   async create(userId: string, dto: CreateEventDto) {
@@ -43,6 +47,25 @@ export class EventService {
         ? EventStatus.PENDING
         : EventStatus.CONFIRMED;
 
+    // 处理重复规则
+    const isRecurring = !!dto.recurrence;
+    const recurrenceData = dto.recurrence
+      ? {
+          isRecurring: true,
+          recurrenceRule: dto.recurrence.type,
+          recurrenceEnd: dto.recurrence.endDate
+            ? new Date(dto.recurrence.endDate)
+            : null,
+          recurrenceCount: dto.recurrence.count || null,
+          recurrenceData: {
+            weekdays: dto.recurrence.weekdays,
+            monthDay: dto.recurrence.monthDay,
+          },
+        }
+      : {
+          isRecurring: false,
+        };
+
     const event = await this.prisma.event.create({
       data: {
         familyId: dto.familyId,
@@ -56,7 +79,7 @@ export class EventService {
         status,
         creatorId: userId,
         assigneeId: dto.assigneeId || userId,
-        recurrence: dto.recurrence || null,
+        ...recurrenceData,
         reminders: {
           create: dto.reminders.map((r) => ({
             type: r.type as any,

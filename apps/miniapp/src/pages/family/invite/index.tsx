@@ -67,7 +67,7 @@ export default function FamilyInvitePage() {
       <View className="invite-card">
         <View className="card-header">
           <Text className="family-icon">👨‍👩‍👧‍👦</Text>
-          <Text className="family-name">{familyName}</Text>
+          <Text className="family-name">{family.name}</Text>
           <Text className="invite-text">邀请你加入家庭</Text>
         </View>
 

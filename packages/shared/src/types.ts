@@ -91,10 +91,13 @@ export interface User {
 }
 
 /** 重复规则 */
-export interface Recurrence {
+export interface RecurrenceRule {
   type: RecurrenceType;
-  interval: number;
-  endDate?: Date;
+  interval?: number; // 间隔（默认1）
+  endDate?: string; // 结束日期 ISO 8601
+  count?: number; // 重复次数
+  weekdays?: number[]; // 周几重复 [0-6]，0=周日
+  monthDay?: number; // 每月第几天 [1-31]
 }
 
 /** 提醒配置 */
@@ -112,12 +115,26 @@ export interface Event {
   startTime: Date;
   endTime?: Date;
   isAllDay: boolean;
-  recurrence?: Recurrence;
   category: EventCategory;
   visibility: Visibility;
   creatorId: string;
   assigneeId?: string;
   status: EventStatus;
+
+  // 重复规则
+  isRecurring: boolean;
+  recurrenceRule?: string; // DAILY|WEEKLY|MONTHLY|YEARLY
+  recurrenceEnd?: Date;
+  recurrenceCount?: number;
+  recurrenceData?: {
+    weekdays?: number[];
+    monthDay?: number;
+  };
+
+  // 重复事件关系
+  seriesMasterId?: string;
+  originalDate?: Date;
+
   reminders: ReminderConfig[];
   createdAt: Date;
   updatedAt: Date;
@@ -148,7 +165,7 @@ export interface CreateEventDto {
   category: EventCategory;
   visibility: Visibility;
   assigneeId?: string;
-  recurrence?: Recurrence;
+  recurrence?: RecurrenceRule;
   reminders: ReminderConfig[];
 }
 

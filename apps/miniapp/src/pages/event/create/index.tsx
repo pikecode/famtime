@@ -1,9 +1,10 @@
 import { View, Text, Input, Textarea, Switch, Picker, ScrollView } from '@tarojs/components';
 import { useState, useEffect } from 'react';
 import Taro, { useRouter } from '@tarojs/taro';
-import { EventCategory, EventColors, Visibility } from '@famtime/shared';
+import { EventCategory, EventColors, Visibility, RecurrenceRule } from '@famtime/shared';
 import Button from '../../../components/Button';
 import Skeleton from '../../../components/Skeleton';
+import RecurrencePicker from '../../../components/RecurrencePicker';
 import { createEvent as apiCreateEvent } from '../../../services/api';
 import { useUserStore } from '../../../stores/user';
 
@@ -48,6 +49,7 @@ export default function EventCreatePage() {
   const [visibility, setVisibility] = useState<Visibility>(Visibility.FAMILY);
   const [assigneeId, setAssigneeId] = useState<string>('');
   const [selectedReminders, setSelectedReminders] = useState<number[]>([1440]);
+  const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>();
 
   const selectedCategory = CATEGORIES.find((c) => c.value === category);
 
@@ -112,6 +114,7 @@ export default function EventCreatePage() {
         category,
         visibility,
         assigneeId: assigneeId || undefined,
+        recurrence,
         reminders: selectedReminders.map(val => ({
           type: val === 0 ? 'at_time' : 'before',
           beforeMinutes: val
@@ -228,6 +231,9 @@ export default function EventCreatePage() {
             </Picker>
           </View>
         )}
+
+        {/* 重复规则选择器 */}
+        <RecurrencePicker value={recurrence} onChange={setRecurrence} />
       </View>
 
       <View className="form-section">

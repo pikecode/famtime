@@ -82,8 +82,18 @@ model Event {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  // 重复规则 (JSON)
-  recurrence  Json?
+  // 重复规则
+  isRecurring     Boolean @default(false)
+  recurrenceRule  String? // 简化的重复规则: "DAILY|WEEKLY|MONTHLY|YEARLY"
+  recurrenceEnd   DateTime? // 重复结束日期
+  recurrenceCount Int? // 重复次数
+  recurrenceData  Json? // 额外数据: {weekdays: [1,3,5], monthDay: 15}
+
+  // 重复事件关系
+  seriesMasterId String? // 如果是重复事件的实例，指向主事件
+  seriesMaster   Event?  @relation("EventSeries", fields: [seriesMasterId], references: [id], onDelete: Cascade)
+  seriesInstances Event[] @relation("EventSeries")
+  originalDate   DateTime? // 原始日期（用于编辑单个实例）
 
   // 关系
   familyId   String
@@ -98,6 +108,7 @@ model Event {
 
   @@index([familyId, startTime])
   @@index([assigneeId, status])
+  @@index([seriesMasterId])
   @@map("events")
 }
 
