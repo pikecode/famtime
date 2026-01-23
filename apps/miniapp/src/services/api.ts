@@ -51,6 +51,22 @@ export async function login(code: string) {
   );
 }
 
+export async function getProfile() {
+  return request<{ id: string; nickname: string; avatar?: string }>(
+    '/auth/profile'
+  );
+}
+
+export async function updateProfile(data: { nickname?: string; avatar?: string }) {
+  return request<{ id: string; nickname: string; avatar?: string }>(
+    '/auth/profile',
+    {
+      method: 'PUT',
+      data,
+    }
+  );
+}
+
 // ============ 家庭相关 ============
 
 export async function createFamily(data: CreateFamilyDto) {

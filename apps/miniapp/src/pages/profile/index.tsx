@@ -1,18 +1,33 @@
 import { View, Text, Switch } from '@tarojs/components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
+import { useUserStore } from '../../stores/user';
+import { getProfile } from '../../services/api';
 import './index.less';
 
 export default function ProfilePage() {
-  const [userInfo] = useState({
-    nickname: '小明',
-    avatar: '',
-  });
+  const user = useUserStore((state) => state.user);
+  const family = useUserStore((state) => state.family);
+  const logout = useUserStore((state) => state.logout);
 
   const [settings, setSettings] = useState({
     enableReminder: true,
     quietHours: true,
   });
+
+  useEffect(() => {
+    // 加载用户信息
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const profile = await getProfile();
+      console.log('Profile loaded:', profile);
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    }
+  };
 
   const handleSettingChange = (key: string, value: boolean) => {
     Taro.vibrateShort({ type: 'light' });
@@ -22,6 +37,20 @@ export default function ProfilePage() {
   const handleMenuClick = (item: any) => {
     Taro.vibrateShort({ type: 'light' });
     item.onClick();
+  };
+
+  const handleLogout = () => {
+    Taro.showModal({
+      title: '退出登录',
+      content: '确定要退出登录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          Taro.vibrateShort({ type: 'medium' });
+          logout();
+          Taro.redirectTo({ url: '/pages/login/index' });
+        }
+      },
+    });
   };
 
   const menuItems = [
@@ -51,12 +80,14 @@ export default function ProfilePage() {
       <View className="user-section">
         <View className="user-avatar">
           <Text className="avatar-text">
-            {userInfo.nickname.charAt(0)}
+            {user?.nickname?.charAt(0) || '?'}
           </Text>
         </View>
         <View className="user-info">
-          <Text className="user-name">{userInfo.nickname}</Text>
-          <Text className="user-role">我们的家 · 成员</Text>
+          <Text className="user-name">{user?.nickname || '未登录'}</Text>
+          <Text className="user-role">
+            {family ? `${family.name} · 成员` : '未加入家庭'}
+          </Text>
         </View>
         <View className="edit-btn">编辑</View>
       </View>
@@ -103,7 +134,7 @@ export default function ProfilePage() {
         </View>
 
         {/* 退出登录 */}
-        <View className="logout-btn" onClick={() => Taro.vibrateShort({ type: 'medium' })}>
+        <View className="logout-btn" onClick={handleLogout}>
           <Text className="logout-text">退出登录</Text>
         </View>
       </View>

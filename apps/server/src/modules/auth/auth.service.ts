@@ -85,4 +85,14 @@ export class AuthService {
       where: { id: userId },
     });
   }
+
+  async updateProfile(
+    userId: string,
+    data: { nickname?: string; avatar?: string },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
 }
