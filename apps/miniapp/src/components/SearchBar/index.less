@@ -1,0 +1,135 @@
+.search-bar {
+  background: #fff;
+  padding: 24rpx 32rpx;
+
+  .search-input-row {
+    display: flex;
+    gap: 16rpx;
+    align-items: center;
+
+    .search-input-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 16rpx;
+      padding: 20rpx 24rpx;
+      background: #F8F9FA;
+      border-radius: 48rpx;
+      border: 2rpx solid transparent;
+      transition: all 0.2s;
+
+      &:focus-within {
+        background: #fff;
+        border-color: #339AF0;
+      }
+
+      .search-icon {
+        font-size: 32rpx;
+        color: #ADB5BD;
+      }
+
+      .search-input {
+        flex: 1;
+        font-size: 28rpx;
+        color: #212529;
+      }
+
+      .clear-icon {
+        font-size: 28rpx;
+        color: #ADB5BD;
+        cursor: pointer;
+        padding: 8rpx;
+
+        &:active {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    .filter-btn {
+      padding: 20rpx 32rpx;
+      background: #F8F9FA;
+      border-radius: 48rpx;
+      font-size: 28rpx;
+      color: #495057;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.active {
+        background: #339AF0;
+        color: #fff;
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+
+  .filter-panel {
+    margin-top: 24rpx;
+    padding: 24rpx;
+    background: #F8F9FA;
+    border-radius: 16rpx;
+    animation: slideDown 0.2s ease-out;
+
+    .filter-section {
+      .filter-label {
+        display: block;
+        font-size: 24rpx;
+        color: #868E96;
+        margin-bottom: 16rpx;
+      }
+
+      .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12rpx;
+
+        .category-filter-chip {
+          display: flex;
+          align-items: center;
+          gap: 8rpx;
+          padding: 16rpx 24rpx;
+          background: #fff;
+          border-radius: 48rpx;
+          font-size: 26rpx;
+          color: #495057;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 2rpx solid transparent;
+
+          .chip-icon {
+            font-size: 28rpx;
+          }
+
+          .chip-label {
+            font-size: 26rpx;
+          }
+
+          &.active {
+            background: #339AF0;
+            color: #fff;
+            border-color: #339AF0;
+            transform: scale(1.05);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

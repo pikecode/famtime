@@ -1,10 +1,11 @@
 import { View, Text, ScrollView } from '@tarojs/components';
 import { useState, useEffect, useMemo } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
-import { EventStatus, Event } from '@famtime/shared';
+import { EventStatus, Event, EventCategory } from '@famtime/shared';
 import Calendar from '../../components/Calendar';
 import EventCard from '../../components/EventCard';
 import Skeleton from '../../components/Skeleton';
+import SearchBar, { SearchFilters } from '../../components/SearchBar';
 import { getEvents } from '../../services/api';
 import { useUserStore } from '../../stores/user';
 import './index.less';
@@ -22,6 +23,8 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(
     formatDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
   );
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
 
   const family = useUserStore((state) => state.family);
 
@@ -68,8 +71,22 @@ export default function CalendarPage() {
   };
 
   const selectedDateEvents = useMemo(() => {
-    return eventsMap[selectedDate] || [];
-  }, [eventsMap, selectedDate]);
+    let events = eventsMap[selectedDate] || [];
+
+    // 应用搜索关键词过滤
+    if (searchKeyword) {
+      events = events.filter((event) =>
+        event.title.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    }
+
+    // 应用分类过滤
+    if (filters.category) {
+      events = events.filter((event) => event.category === filters.category);
+    }
+
+    return events;
+  }, [eventsMap, selectedDate, searchKeyword, filters]);
 
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
@@ -112,6 +129,12 @@ export default function CalendarPage() {
 
   return (
     <View className="calendar-page">
+      {/* 搜索栏 */}
+      <SearchBar
+        onSearch={setSearchKeyword}
+        onFilterChange={setFilters}
+      />
+
       <View className="top-section">
         {loading ? (
           <View className="calendar-skeleton">
