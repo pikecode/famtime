@@ -3,7 +3,11 @@ import { useState, useEffect } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { FamilyMemory } from '@famtime/shared';
 import { useUserStore } from '../../stores/user';
+import { getFamilyMemories, generateMonthlyMemory } from '../../services/api';
+import { handleError, showLoading, hideLoading, showSuccess } from '../../utils/helpers';
 import MemoryCard from '../../components/MemoryCard';
+import EmptyState from '../../components/EmptyState';
+import LoadingState from '../../components/LoadingState';
 import './index.less';
 
 interface MemoryEvent {
@@ -27,98 +31,45 @@ export default function MemoryPage() {
   const fetchMemories = async () => {
     setLoading(true);
     try {
-      // TODO: 实际 API 调用
-      // const data = await getFamilyMemories(family!.id);
-      // setMemories(data);
-
-      // Mock 数据
-      const mockMemories: FamilyMemory[] = [
-        {
-          id: '1',
-          familyId: family!.id,
-          type: 'monthly' as any,
-          period: '2024-01',
-          title: '2024年1月的美好时光',
-          summary: '这个月，我们庆祝了2个生日，进行了5次家庭活动，完成了3次健康记录。共记录了15个珍贵时刻，每一个都值得回味。',
-          eventCount: 15,
-          highlights: [
-            {
-              eventId: '1',
-              title: '小明的生日派对',
-              date: '2024-01-15',
-              category: 'birthday' as any,
-            },
-            {
-              eventId: '2',
-              title: '全家去公园野餐',
-              date: '2024-01-20',
-              category: 'family_activity' as any,
-            },
-            {
-              eventId: '3',
-              title: '爸爸体检',
-              date: '2024-01-25',
-              category: 'health' as any,
-            },
-          ],
-          createdAt: new Date('2024-02-01'),
-          updatedAt: new Date('2024-02-01'),
-        },
-        {
-          id: '2',
-          familyId: family!.id,
-          type: 'monthly' as any,
-          period: '2023-12',
-          title: '2023年12月的美好时光',
-          summary: '这个月，我们庆祝了1个生日，纪念了2个特殊日子，进行了8次家庭活动。共记录了20个珍贵时刻，每一个都值得回味。',
-          eventCount: 20,
-          highlights: [
-            {
-              eventId: '4',
-              title: '圣诞节家庭聚会',
-              date: '2023-12-25',
-              category: 'family_activity' as any,
-            },
-            {
-              eventId: '5',
-              title: '结婚纪念日',
-              date: '2023-12-10',
-              category: 'anniversary' as any,
-            },
-          ],
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
-        },
-      ];
-
-      setMemories(mockMemories);
+      const data = await getFamilyMemories(family!.id);
+      setMemories(data);
     } catch (e) {
       console.error('Fetch memories failed', e);
+      setMemories([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleMemoryClick = (memory: FamilyMemory) => {
-    Taro.showToast({ title: '回忆详情即将上线', icon: 'none' });
+    Taro.vibrateShort({ type: 'light' });
+    Taro.navigateTo({ url: `/pages/memory/detail/index?id=${memory.id}` });
   };
 
-  const handleGenerateMemory = () => {
-    Taro.vibrateShort({ type: 'medium' });
-    Taro.showModal({
-      title: '生成回忆录',
-      content: '是否为本月生成回忆录？',
-      success: (res) => {
-        if (res.confirm) {
-          Taro.showToast({ title: '生成中...', icon: 'loading' });
-          // TODO: 调用生成 API
-          setTimeout(() => {
-            Taro.showToast({ title: '生成成功', icon: 'success' });
-            fetchMemories();
-          }, 1500);
-        }
-      },
+  const handleGenerateMemory = async () => {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      Taro.vibrateShort({ type: 'medium' });
+      Taro.showModal({
+        title: '生成回忆录',
+        content: '是否为本月生成回忆录？',
+        success: (res) => resolve(res.confirm),
+        fail: () => resolve(false),
+      });
     });
+
+    if (!confirmed) return;
+
+    try {
+      showLoading('生成中...');
+      const now = new Date();
+      await generateMonthlyMemory(family!.id, now.getFullYear(), now.getMonth() + 1);
+      hideLoading();
+      showSuccess('生成成功');
+      await fetchMemories();
+    } catch (e) {
+      hideLoading();
+      handleError(e, '生成失败');
+    }
   };
 
   if (!family?.id) {
@@ -143,22 +94,23 @@ export default function MemoryPage() {
       </View>
 
       {loading ? (
-        <View className="loading-state">
-          <Text>加载中...</Text>
-        </View>
+        <LoadingState text="加载回忆中..." />
       ) : memories.length === 0 ? (
-        <View className="empty-state">
-          <Text className="empty-icon">📖</Text>
-          <Text className="empty-title">还没有回忆录</Text>
-          <Text className="empty-desc">点击上方按钮生成第一份回忆录吧</Text>
-        </View>
+        <EmptyState
+          icon="💭"
+          title="还没有回忆"
+          description="点击上方按钮生成本月回忆录"
+          actionText="生成回忆"
+          onAction={handleGenerateMemory}
+        />
       ) : (
         <ScrollView scrollY className="memories-scroll">
           <View className="memories-list">
-            {memories.map((memory) => (
+            {memories.map((memory, index) => (
               <MemoryCard
                 key={memory.id}
                 memory={memory}
+                index={index}
                 onClick={handleMemoryClick}
               />
             ))}

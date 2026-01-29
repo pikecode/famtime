@@ -15,28 +15,53 @@ const BASE_URL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:3000/api'
   : 'https://your-domain.com/api';
 
+// 请求拦截器 - 添加token
+function getHeaders() {
+  const token = Taro.getStorageSync('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 // 通用请求方法
 async function request<T>(
   url: string,
   options: Taro.request.Option = {}
 ): Promise<T> {
-  const token = Taro.getStorageSync('token');
+  try {
+    const res = await Taro.request<ApiResponse<T>>({
+      url: `${BASE_URL}${url}`,
+      header: {
+        ...getHeaders(),
+        ...options.header,
+      },
+      timeout: 10000, // 10秒超时
+      ...options,
+    });
 
-  const res = await Taro.request<ApiResponse<T>>({
-    url: `${BASE_URL}${url}`,
-    header: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.header,
-    },
-    ...options,
-  });
+    // 检查HTTP状态码
+    if (res.statusCode >= 400) {
+      throw new Error(`HTTP ${res.statusCode}: ${res.data?.message || '请求失败'}`);
+    }
 
-  if (res.data.code !== 0) {
-    throw new Error(res.data.message);
+    // 检查业务状态码
+    if (res.data.code !== 0) {
+      throw new Error(res.data.message || '操作失败');
+    }
+
+    return res.data.data as T;
+  } catch (error: any) {
+    // 网络错误处理
+    if (error.errMsg) {
+      if (error.errMsg.includes('timeout')) {
+        throw new Error('请求超时，请检查网络连接');
+      } else if (error.errMsg.includes('fail')) {
+        throw new Error('网络连接失败，请检查网络');
+      }
+    }
+    throw error;
   }
-
-  return res.data.data as T;
 }
 
 // ============ 认证相关 ============
@@ -78,6 +103,10 @@ export async function createFamily(data: CreateFamilyDto) {
 
 export async function getFamily(id: string) {
   return request<Family>(`/family/${id}`);
+}
+
+export async function getMyFamilies() {
+  return request<Family[]>('/family/my');
 }
 
 export async function joinFamily(data: JoinFamilyDto) {
@@ -164,6 +193,25 @@ export async function rejectEvent(id: string) {
   });
 }
 
+// ============ 评论相关 ============
+
+export async function getEventComments(eventId: string) {
+  return request<any[]>(`/comments/event/${eventId}`);
+}
+
+export async function createComment(data: { eventId: string; content: string }) {
+  return request<any>('/comments', {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function deleteComment(commentId: string) {
+  return request<void>(`/comments/${commentId}`, {
+    method: 'DELETE',
+  });
+}
+
 // ============ 回忆相关 ============
 
 export async function getThisDayMemories(familyId: string) {
@@ -177,4 +225,19 @@ export async function getMonthlySummary(familyId: string, year: number, month: n
     importantDays: number;
     pendingCount: number;
   }>(`/memory/${familyId}/summary?year=${year}&month=${month}`);
+}
+
+export async function getFamilyMemories(familyId: string) {
+  return request<any[]>(`/memories/family/${familyId}`);
+}
+
+export async function getMemory(memoryId: string) {
+  return request<any>(`/memories/${memoryId}`);
+}
+
+export async function generateMonthlyMemory(familyId: string, year: number, month: number) {
+  return request<any>('/memories/generate/monthly', {
+    method: 'POST',
+    data: { familyId, year, month },
+  });
 }

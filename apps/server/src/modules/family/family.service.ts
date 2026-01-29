@@ -200,29 +200,33 @@ export class FamilyService {
     return { inviteCode: newCode };
   }
 
-  // 获取用户的家庭
+  // 获取用户的家庭（返回所有家庭）
   async getUserFamily(userId: string) {
-    const member = await this.prisma.familyMember.findFirst({
+    console.log('[FamilyService] getUserFamily called for userId:', userId);
+    const members = await this.prisma.familyMember.findMany({
       where: { userId },
       include: {
         family: {
-          include: {
-            members: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    nickname: true,
-                    avatar: true,
-                  },
-                },
-              },
-            },
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            inviteCode: true,
+            createdAt: true,
           },
         },
       },
+      orderBy: {
+        joinedAt: 'asc', // 按加入时间排序，最早加入的在前
+      },
     });
 
-    return member?.family || null;
+    console.log('[FamilyService] Found members:', members.length);
+    console.log('[FamilyService] Members data:', JSON.stringify(members, null, 2));
+
+    // 返回家庭列表
+    const families = members.map(m => m.family);
+    console.log('[FamilyService] Returning families:', JSON.stringify(families, null, 2));
+    return families;
   }
 }

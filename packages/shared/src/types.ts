@@ -2,12 +2,12 @@
 
 /** 事件类型 */
 export enum EventCategory {
-  BIRTHDAY = 'birthday',           // 生日 - 红色
-  ANNIVERSARY = 'anniversary',     // 纪念日 - 粉色
-  HEALTH = 'health',               // 健康相关 - 绿色
-  FAMILY_ACTIVITY = 'family_activity', // 家庭活动 - 蓝色
-  REMINDER = 'reminder',           // 普通提醒 - 黄色
-  OTHER = 'other',                 // 其他 - 灰色
+  BIRTHDAY = 'BIRTHDAY',           // 生日 - 红色
+  ANNIVERSARY = 'ANNIVERSARY',     // 纪念日 - 粉色
+  HEALTH = 'HEALTH',               // 健康相关 - 绿色
+  FAMILY_ACTIVITY = 'FAMILY_ACTIVITY', // 家庭活动 - 蓝色
+  REMINDER = 'REMINDER',           // 普通提醒 - 黄色
+  OTHER = 'OTHER',                 // 其他 - 灰色
 }
 
 /** 事件颜色映射 */
@@ -30,8 +30,8 @@ export enum EventStatus {
 
 /** 可见性 */
 export enum Visibility {
-  PRIVATE = 'private',   // 仅自己可见
-  FAMILY = 'family',     // 家庭成员可见
+  PRIVATE = 'PRIVATE',   // 仅自己可见
+  FAMILY = 'FAMILY',     // 家庭成员可见
 }
 
 /** 家庭成员角色 */
@@ -50,8 +50,8 @@ export enum RecurrenceType {
 
 /** 提醒类型 */
 export enum ReminderType {
-  AT_TIME = 'at_time',     // 事件开始时
-  BEFORE = 'before',       // 提前提醒
+  AT_TIME = 'AT_TIME',     // 事件开始时
+  BEFORE = 'BEFORE',       // 提前提醒
 }
 
 /** 回忆类型 */

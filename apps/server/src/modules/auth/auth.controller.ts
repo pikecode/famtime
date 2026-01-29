@@ -1,14 +1,21 @@
 import { Controller, Post, Body, Get, Put } from '@nestjs/common';
+import { IsString, IsOptional } from 'class-validator';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 import { CurrentUser } from './current-user.decorator';
 
 class LoginDto {
+  @IsString()
   code: string;
 }
 
 class UpdateProfileDto {
+  @IsString()
+  @IsOptional()
   nickname?: string;
+
+  @IsString()
+  @IsOptional()
   avatar?: string;
 }
 

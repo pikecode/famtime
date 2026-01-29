@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventStatus, EventCategory, Visibility } from '@prisma/client';
@@ -116,6 +117,18 @@ export class EventService {
     startDate: string,
     endDate: string,
   ) {
+    // 验证日期格式
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime())) {
+      throw new BadRequestException(`无效的开始日期: ${startDate}`);
+    }
+
+    if (isNaN(end.getTime())) {
+      throw new BadRequestException(`无效的结束日期: ${endDate}`);
+    }
+
     // 验证用户是否是家庭成员
     const member = await this.prisma.familyMember.findFirst({
       where: { userId, familyId },
@@ -129,7 +142,7 @@ export class EventService {
       where: {
         familyId,
         startTime: {
-          gte: new Date(startDate),
+          gte: start,
           lte: new Date(endDate + 'T23:59:59'),
         },
         OR: [
@@ -222,7 +235,7 @@ export class EventService {
         isAllDay: dto.isAllDay,
         category: dto.category,
         visibility: dto.visibility,
-        recurrence: dto.recurrence,
+        // recurrence: dto.recurrence, // 移除这个字段，因为 Prisma schema 中没有这个字段
       },
       include: {
         creator: { select: { id: true, nickname: true } },

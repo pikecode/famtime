@@ -44,10 +44,13 @@ export default function CalendarPage() {
     }
 
     try {
-      // 获取当前月及前后一个月的范围以覆盖日历显示
-      const startDate = formatDate(currentYear, currentMonth - 1, 1);
-      const endDate = formatDate(currentYear, currentMonth + 1, 31);
-      
+      // 计算当前月及前后一个月的有效范围
+      const startDateObj = new Date(currentYear, currentMonth - 1, 1);
+      const endDateObj = new Date(currentYear, currentMonth + 1, 0); // 0日获取上月最后一天
+
+      const startDate = startDateObj.toISOString().split('T')[0];
+      const endDate = endDateObj.toISOString().split('T')[0];
+
       const events = await getEvents({
         familyId: family.id,
         startDate,
@@ -114,6 +117,13 @@ export default function CalendarPage() {
     setSelectedDate(formatDate(today.getFullYear(), today.getMonth(), today.getDate()));
   };
 
+  const handleMonthChange = (year: number, month: number) => {
+    setCurrentYear(year);
+    setCurrentMonth(month);
+    // 选中该月的第一天
+    setSelectedDate(formatDate(year, month, 1));
+  };
+
   const handleDayClick = (day: number) => {
     setSelectedDate(formatDate(currentYear, currentMonth, day));
   };
@@ -150,6 +160,7 @@ export default function CalendarPage() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
             onTodayClick={handleToday}
+            onMonthChange={handleMonthChange}
           />
         )}
       </View>
@@ -175,14 +186,14 @@ export default function CalendarPage() {
           )}
         </View>
 
-        <ScrollView scrollY className="event-list-scroll">
+        <View className="event-list-container">
           {!family?.id ? (
             <View className="empty-state">
               <View className="empty-icon-wrapper">
                 <Text className="empty-emoji">🏠</Text>
               </View>
               <Text className="empty-text">尚未加入家庭</Text>
-              <Text className="empty-hint">请前往“家庭”频道创建或加入</Text>
+              <Text className="empty-hint">请前往"家庭"频道创建或加入</Text>
             </View>
           ) : loading ? (
             <View className="cards-container">
@@ -215,7 +226,7 @@ export default function CalendarPage() {
               ))}
             </View>
           )}
-        </ScrollView>
+        </View>
       </View>
 
       {family?.id && !loading && (

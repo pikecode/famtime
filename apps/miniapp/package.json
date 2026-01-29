@@ -9,10 +9,10 @@
     "css": "less"
   },
   "scripts": {
-    "dev:weapp": "taro build --type weapp --watch",
-    "build:weapp": "taro build --type weapp",
-    "dev:h5": "taro build --type h5 --watch",
-    "build:h5": "taro build --type h5"
+    "dev:weapp": "NODE_ENV=development taro build --type weapp --watch",
+    "build:weapp": "NODE_ENV=production taro build --type weapp",
+    "dev:h5": "NODE_ENV=development taro build --type h5 --watch",
+    "build:h5": "NODE_ENV=production taro build --type h5"
   },
   "browserslist": [
     "last 3 versions",

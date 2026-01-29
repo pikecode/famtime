@@ -38,7 +38,7 @@ export class MemberController {
 
   @Put('member/:id')
   async updateMember(
-    @Request() req,
+    @Request() req: any,
     @Param('id') id: string,
     @Body() dto: UpdateMemberDto,
   ) {
@@ -51,7 +51,7 @@ export class MemberController {
   }
 
   @Delete('member/:id')
-  async removeMember(@Request() req, @Param('id') id: string) {
+  async removeMember(@Request() req: any, @Param('id') id: string) {
     await this.memberService.removeMember(req.user.id, id);
     return {
       code: 0,
@@ -61,7 +61,7 @@ export class MemberController {
 
   @Post('family/:familyId/transfer-admin')
   async transferAdmin(
-    @Request() req,
+    @Request() req: any,
     @Param('familyId') familyId: string,
     @Body() dto: TransferAdminDto,
   ) {

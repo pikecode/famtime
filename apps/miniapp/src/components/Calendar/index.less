@@ -20,19 +20,22 @@
 }
 
 .nav-icon {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
-  color: #ADB5BD;
-  font-weight: 300;
+  font-size: 56px;
+  color: #495057;
+  font-weight: 400;
   border-radius: 50%;
-  
+  background: #F8F9FA;
+  transition: all 0.2s;
+
   &:active {
-    background: #F1F3F5;
-    color: #339AF0;
+    background: #339AF0;
+    color: #fff;
+    transform: scale(0.92);
   }
 }
 
@@ -40,6 +43,15 @@
   font-size: 34px;
   font-weight: 700;
   color: #212529;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 12px;
+  transition: all 0.2s;
+
+  &:active {
+    background: #F1F3F5;
+    transform: scale(0.96);
+  }
 }
 
 .today-btn {

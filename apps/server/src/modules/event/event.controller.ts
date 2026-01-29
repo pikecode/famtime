@@ -10,39 +10,101 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { IsString, IsBoolean, IsOptional, IsEnum, IsArray } from 'class-validator';
 import { AuthGuard } from '@nestjs/passport';
 import { EventService } from './event.service';
 import { EventCategory, Visibility } from '@prisma/client';
+import { FamilyMemberGuard } from '../../guards/family-member.guard';
+import { FamilyMember } from '../../decorators/family-member.decorator';
 
 class CreateEventDto {
+  @IsString()
   familyId: string;
+
+  @IsString()
   title: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
+
+  @IsString()
   startTime: string;
+
+  @IsString()
+  @IsOptional()
   endTime?: string;
+
+  @IsBoolean()
   isAllDay: boolean;
+
+  @IsEnum(EventCategory)
   category: EventCategory;
+
+  @IsEnum(Visibility)
   visibility: Visibility;
+
+  @IsString()
+  @IsOptional()
   assigneeId?: string;
-  recurrence?: object;
+
+  @IsOptional()
+  recurrence?: any;
+
+  @IsArray()
   reminders: Array<{ type: string; beforeMinutes?: number }>;
 }
 
 class UpdateEventDto {
+  @IsString()
+  @IsOptional()
   title?: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
   startTime?: string;
+
+  @IsString()
+  @IsOptional()
   endTime?: string;
+
+  @IsBoolean()
+  @IsOptional()
   isAllDay?: boolean;
+
+  @IsEnum(EventCategory)
+  @IsOptional()
   category?: EventCategory;
+
+  @IsEnum(Visibility)
+  @IsOptional()
   visibility?: Visibility;
-  recurrence?: object;
+
+  @IsString()
+  @IsOptional()
+  assigneeId?: string;
+
+  @IsOptional()
+  recurrence?: any;
 }
 
 class QueryEventsDto {
+  @IsString()
   familyId: string;
+
+  @IsString()
   startDate: string;
+
+  @IsString()
   endDate: string;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
 }
 
 @Controller()
@@ -51,7 +113,12 @@ export class EventController {
   constructor(private eventService: EventService) {}
 
   @Post('event')
-  async create(@Request() req, @Body() dto: CreateEventDto) {
+  @UseGuards(FamilyMemberGuard)
+  async create(
+    @Request() req: any,
+    @Body() dto: CreateEventDto,
+    @FamilyMember() member: any,
+  ) {
     const event = await this.eventService.create(req.user.id, dto);
     return {
       code: 0,
@@ -61,7 +128,12 @@ export class EventController {
   }
 
   @Get('events')
-  async findAll(@Request() req, @Query() query: QueryEventsDto) {
+  @UseGuards(FamilyMemberGuard)
+  async findAll(
+    @Request() req: any,
+    @Query() query: QueryEventsDto,
+    @FamilyMember() member: any,
+  ) {
     const events = await this.eventService.findByDateRange(
       req.user.id,
       query.familyId,
@@ -76,7 +148,12 @@ export class EventController {
   }
 
   @Get('events/pending')
-  async getPending(@Request() req, @Query('familyId') familyId: string) {
+  @UseGuards(FamilyMemberGuard)
+  async getPending(
+    @Request() req: any,
+    @Query('familyId') familyId: string,
+    @FamilyMember() member: any,
+  ) {
     const events = await this.eventService.getPendingEvents(
       req.user.id,
       familyId,
@@ -89,7 +166,7 @@ export class EventController {
   }
 
   @Get('event/:id')
-  async findOne(@Request() req, @Param('id') id: string) {
+  async findOne(@Request() req: any, @Param('id') id: string) {
     const event = await this.eventService.findById(req.user.id, id);
     return {
       code: 0,
@@ -100,7 +177,7 @@ export class EventController {
 
   @Put('event/:id')
   async update(
-    @Request() req,
+    @Request() req: any,
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
   ) {
@@ -113,7 +190,7 @@ export class EventController {
   }
 
   @Delete('event/:id')
-  async delete(@Request() req, @Param('id') id: string) {
+  async delete(@Request() req: any, @Param('id') id: string) {
     await this.eventService.delete(req.user.id, id);
     return {
       code: 0,
@@ -122,7 +199,7 @@ export class EventController {
   }
 
   @Post('event/:id/accept')
-  async accept(@Request() req, @Param('id') id: string) {
+  async accept(@Request() req: any, @Param('id') id: string) {
     const event = await this.eventService.accept(req.user.id, id);
     return {
       code: 0,
@@ -132,7 +209,7 @@ export class EventController {
   }
 
   @Post('event/:id/reject')
-  async reject(@Request() req, @Param('id') id: string) {
+  async reject(@Request() req: any, @Param('id') id: string) {
     const event = await this.eventService.reject(req.user.id, id);
     return {
       code: 0,

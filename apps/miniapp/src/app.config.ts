@@ -1,9 +1,11 @@
 export default defineAppConfig({
   pages: [
     'pages/login/index',
+    'pages/onboarding/index',
     'pages/calendar/index',
     'pages/family/index',
     'pages/memory/index',
+    'pages/memory/detail/index',
     'pages/profile/index',
     'pages/event/create/index',
     'pages/event/detail/index',
@@ -19,7 +21,6 @@ export default defineAppConfig({
     navigationBarTextStyle: 'black',
   },
   tabBar: {
-    custom: true,
     color: '#868E96',
     selectedColor: '#339AF0',
     backgroundColor: '#ffffff',
@@ -28,18 +29,26 @@ export default defineAppConfig({
       {
         pagePath: 'pages/calendar/index',
         text: '日历',
+        iconPath: 'assets/icons/calendar.png',
+        selectedIconPath: 'assets/icons/calendar-active.png',
       },
       {
         pagePath: 'pages/family/index',
         text: '家庭',
+        iconPath: 'assets/icons/family.png',
+        selectedIconPath: 'assets/icons/family-active.png',
       },
       {
         pagePath: 'pages/memory/index',
         text: '回忆',
+        iconPath: 'assets/icons/memory.png',
+        selectedIconPath: 'assets/icons/memory-active.png',
       },
       {
         pagePath: 'pages/profile/index',
         text: '我的',
+        iconPath: 'assets/icons/profile.png',
+        selectedIconPath: 'assets/icons/profile-active.png',
       },
     ],
   },

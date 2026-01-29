@@ -5,16 +5,11 @@ import { EventCategory, EventColors, Visibility, RecurrenceRule } from '@famtime
 import Button from '../../../components/Button';
 import Skeleton from '../../../components/Skeleton';
 import RecurrencePicker from '../../../components/RecurrencePicker';
-import { createEvent as apiCreateEvent } from '../../../services/api';
+import EmptyState from '../../../components/EmptyState';
+import { createEvent as apiCreateEvent, getFamilyMembers } from '../../../services/api';
 import { useUserStore } from '../../../stores/user';
-
-// Mock 家庭成员数据
-const MOCK_MEMBERS = [
-  { id: '1', nickname: '爸爸', color: '#339AF0', avatar: '👨‍🦰' },
-  { id: '2', nickname: '妈妈', color: '#FF6B6B', avatar: '👩‍🦰' },
-  { id: '3', nickname: '小明', color: '#51CF66', avatar: '👦' },
-  { id: '4', nickname: '小红', color: '#FF85A2', avatar: '👧' },
-];
+import { handleError, showLoading, hideLoading, showSuccess } from '../../../utils/helpers';
+import './index.less';
 
 const CATEGORIES = [
   { value: EventCategory.BIRTHDAY, label: '生日', icon: '🎂' },
@@ -39,6 +34,7 @@ export default function EventCreatePage() {
   const initialDate = router.params.date || new Date().toISOString().split('T')[0];
 
   const [loading, setLoading] = useState(true);
+  const [members, setMembers] = useState<any[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(initialDate);
@@ -52,11 +48,24 @@ export default function EventCreatePage() {
   const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>();
 
   const selectedCategory = CATEGORIES.find((c) => c.value === category);
+  const family = useUserStore((state) => state.family);
 
   useEffect(() => {
+    const loadMembers = async () => {
+      if (family?.id) {
+        try {
+          const familyMembers = await getFamilyMembers(family.id);
+          setMembers(familyMembers);
+        } catch (error) {
+          console.error('Failed to load family members:', error);
+        }
+      }
+      setLoading(false);
+    };
+
     // 模拟加载效果
-    setTimeout(() => setLoading(false), 600);
-  }, []);
+    setTimeout(loadMembers, 600);
+  }, [family]);
 
   const handleDateChange = (e: any) => setDate(e.detail.value);
   const handleStartTimeChange = (e: any) => setStartTime(e.detail.value);
@@ -84,12 +93,16 @@ export default function EventCreatePage() {
     setAssigneeId(id === assigneeId ? '' : id);
   };
 
-  const family = useUserStore((state) => state.family);
-
   const handleSubmit = async () => {
+    // 表单验证
     if (!title.trim()) {
       Taro.vibrateShort({ type: 'error' });
       Taro.showToast({ title: '请输入事件标题', icon: 'none' });
+      return;
+    }
+
+    if (title.length > 50) {
+      Taro.showToast({ title: '标题不能超过50个字符', icon: 'none' });
       return;
     }
 
@@ -98,16 +111,27 @@ export default function EventCreatePage() {
       return;
     }
 
+    // 验证时间
+    if (!isAllDay) {
+      const start = new Date(`${date}T${startTime}:00`);
+      const end = new Date(`${date}T${endTime}:00`);
+
+      if (end <= start) {
+        Taro.showToast({ title: '结束时间必须晚于开始时间', icon: 'none' });
+        return;
+      }
+    }
+
     try {
-      Taro.showLoading({ title: '正在保存...' });
-      
+      showLoading('正在保存...');
+
       const startDateTime = `${date}T${startTime}:00`;
       const endDateTime = isAllDay ? undefined : `${date}T${endTime}:00`;
 
       await apiCreateEvent({
         familyId: family.id,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         startTime: new Date(startDateTime).toISOString(),
         endTime: endDateTime ? new Date(endDateTime).toISOString() : undefined,
         isAllDay,
@@ -116,18 +140,18 @@ export default function EventCreatePage() {
         assigneeId: assigneeId || undefined,
         recurrence,
         reminders: selectedReminders.map(val => ({
-          type: val === 0 ? 'at_time' : 'before',
+          type: val === 0 ? 'AT_TIME' : 'BEFORE',
           beforeMinutes: val
         })) as any
       });
 
-      Taro.vibrateShort({ type: 'medium' });
-      Taro.showToast({ title: '创建成功', icon: 'success' });
-      setTimeout(() => Taro.navigateBack(), 1500);
+      hideLoading();
+      showSuccess('创建成功');
+
+      setTimeout(() => Taro.navigateBack(), 1000);
     } catch (e) {
-      Taro.showToast({ title: e.message || '保存失败', icon: 'none' });
-    } finally {
-      Taro.hideLoading();
+      hideLoading();
+      handleError(e, '保存失败');
     }
   };
 
@@ -186,14 +210,14 @@ export default function EventCreatePage() {
               </View>
               <Text className="avatar-label">自己</Text>
             </View>
-            {MOCK_MEMBERS.map((member) => (
-              <View 
-                key={member.id} 
-                className={`member-avatar-node ${assigneeId === member.id ? 'active' : ''}`}
-                onClick={() => handleMemberSelect(member.id)}
+            {members.map((member) => (
+              <View
+                key={member.id}
+                className={`member-avatar-node ${assigneeId === member.userId ? 'active' : ''}`}
+                onClick={() => handleMemberSelect(member.userId)}
               >
                 <View className="avatar-circle" style={{ backgroundColor: member.color }}>
-                  <Text>{member.avatar}</Text>
+                  <Text>{member.nickname.charAt(0)}</Text>
                 </View>
                 <Text className="avatar-label">{member.nickname}</Text>
               </View>

@@ -1,15 +1,58 @@
 .memory-card {
-  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
   border-radius: 24rpx;
   padding: 40rpx;
   margin-bottom: 32rpx;
-  box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.3);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  background-color: #FF6B35; // 默认背景色，防止渐变不生效
 
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
+    opacity: 0.9;
+  }
+
+  // 温暖橙色渐变
+  &.gradient-orange {
+    background-color: #FF6B35;
+    background-image: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    box-shadow: 0 8rpx 32rpx rgba(255, 107, 53, 0.4);
+  }
+
+  // 清新蓝绿渐变
+  &.gradient-blue {
+    background-color: #667EEA;
+    background-image: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+    box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.4);
+  }
+
+  // 浪漫紫色渐变
+  &.gradient-purple {
+    background-color: #A8EDEA;
+    background-image: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+    box-shadow: 0 8rpx 32rpx rgba(168, 237, 234, 0.4);
+  }
+
+  // 活力粉色渐变
+  &.gradient-pink {
+    background-color: #FF6B9D;
+    background-image: linear-gradient(135deg, #FF6B9D 0%, #C06C84 100%);
+    box-shadow: 0 8rpx 32rpx rgba(255, 107, 157, 0.4);
+  }
+
+  // 清新绿色渐变
+  &.gradient-green {
+    background-color: #56AB2F;
+    background-image: linear-gradient(135deg, #56AB2F 0%, #A8E063 100%);
+    box-shadow: 0 8rpx 32rpx rgba(86, 171, 47, 0.4);
+  }
+
+  // 深邃蓝紫渐变
+  &.gradient-deep-blue {
+    background-color: #4E54C8;
+    background-image: linear-gradient(135deg, #4E54C8 0%, #8F94FB 100%);
+    box-shadow: 0 8rpx 32rpx rgba(78, 84, 200, 0.4);
   }
 
   .memory-header {
@@ -20,17 +63,21 @@
 
     .period-badge {
       padding: 12rpx 24rpx;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(10rpx);
       border-radius: 48rpx;
       font-size: 24rpx;
       font-weight: 600;
       color: #fff;
+      box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+      text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
     }
 
     .event-count {
       font-size: 24rpx;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 500;
+      text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
     }
   }
 
@@ -44,13 +91,15 @@
       color: #fff;
       margin-bottom: 16rpx;
       line-height: 1.4;
+      text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.3);
     }
 
     .memory-summary {
       display: block;
       font-size: 28rpx;
       line-height: 1.6;
-      color: rgba(255, 255, 255, 0.9);
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.2);
     }
   }
 
@@ -60,8 +109,10 @@
     .highlights-label {
       display: block;
       font-size: 24rpx;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.9);
       margin-bottom: 16rpx;
+      font-weight: 500;
+      text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
     }
 
     .highlights-scroll {
@@ -77,10 +128,11 @@
         align-items: center;
         gap: 12rpx;
         padding: 16rpx 24rpx;
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.25);
         backdrop-filter: blur(10rpx);
         border-radius: 48rpx;
         white-space: nowrap;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
 
         .highlight-icon {
           font-size: 32rpx;
@@ -89,9 +141,11 @@
         .highlight-title {
           font-size: 26rpx;
           color: #fff;
+          font-weight: 500;
           max-width: 200rpx;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
         }
       }
     }
@@ -103,8 +157,9 @@
 
     .view-detail {
       font-size: 28rpx;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.2);
     }
   }
 }

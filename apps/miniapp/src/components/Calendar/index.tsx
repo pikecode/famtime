@@ -1,5 +1,5 @@
-import { View, Text } from '@tarojs/components';
-import { useMemo } from 'react';
+import { View, Text, Picker } from '@tarojs/components';
+import { useMemo, useState } from 'react';
 import Taro from '@tarojs/taro';
 import { EventColors, EventStatus } from '@famtime/shared';
 import { getLunarDisplay } from '../../utils/lunar';
@@ -14,6 +14,7 @@ interface CalendarProps {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onTodayClick: () => void;
+  onMonthChange?: (year: number, month: number) => void;
 }
 
 const getDaysInMonth = (year: number, month: number) => {
@@ -38,9 +39,31 @@ export default function Calendar(props: CalendarProps) {
     onPrevMonth,
     onNextMonth,
     onTodayClick,
+    onMonthChange,
   } = props;
 
+  const [showPicker, setShowPicker] = useState(false);
+
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+
+  // 格式化为 YYYY-MM 格式供 Picker 使用
+  const currentDateValue = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+  const handleMonthPickerChange = (e) => {
+    const value = e.detail.value; // 格式: YYYY-MM
+    const [year, month] = value.split('-').map(Number);
+
+    if (onMonthChange) {
+      onMonthChange(year, month - 1); // month - 1 因为 JS 月份从 0 开始
+    }
+
+    Taro.vibrateShort({ type: 'light' });
+  };
+
+  const handleMonthTextClick = () => {
+    Taro.vibrateShort({ type: 'light' });
+    setShowPicker(true);
+  };
 
   const calendarDays = useMemo(() => {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -102,9 +125,16 @@ export default function Calendar(props: CalendarProps) {
       <View className="calendar-header">
         <View className="month-selector">
           <View className="nav-icon" onClick={handlePrev}>‹</View>
-          <Text className="current-date" onClick={onTodayClick}>
-            {currentYear}年{currentMonth + 1}月
-          </Text>
+          <Picker
+            mode="date"
+            fields="month"
+            value={currentDateValue}
+            onChange={handleMonthPickerChange}
+          >
+            <Text className="current-date" onClick={handleMonthTextClick}>
+              {currentYear}年{currentMonth + 1}月
+            </Text>
+          </Picker>
           <View className="nav-icon" onClick={handleNext}>›</View>
         </View>
         <View className="today-btn" onClick={onTodayClick}>今</View>

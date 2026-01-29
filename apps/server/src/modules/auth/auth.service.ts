@@ -60,10 +60,14 @@ export class AuthService {
     const appid = this.configService.get<string>('WECHAT_APPID');
     const secret = this.configService.get<string>('WECHAT_SECRET');
 
-    // 开发环境模拟
+    // 开发环境模拟 - 使用固定的 openid 以保持用户身份稳定
     if (this.configService.get<string>('NODE_ENV') === 'development') {
+      // 从 code 中提取用户标识，如果 code 以 'user_' 开头则使用，否则使用默认
+      // 这样可以在开发时模拟不同用户：传入 'user_alice', 'user_bob' 等
+      const openid = code.startsWith('user_') ? `dev_${code}` : 'dev_default_user';
+      console.log('[Auth] Development mode - using openid:', openid);
       return {
-        openid: `dev_${code}`,
+        openid,
         session_key: 'dev_session_key',
       };
     }

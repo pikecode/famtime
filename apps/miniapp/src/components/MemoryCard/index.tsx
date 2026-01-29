@@ -6,10 +6,11 @@ import './index.less';
 
 interface MemoryCardProps {
   memory: FamilyMemory;
+  index?: number;
   onClick: (memory: FamilyMemory) => void;
 }
 
-export default function MemoryCard({ memory, onClick }: MemoryCardProps) {
+export default function MemoryCard({ memory, index = 0, onClick }: MemoryCardProps) {
   const handleClick = () => {
     Taro.vibrateShort({ type: 'light' });
     onClick(memory);
@@ -35,8 +36,20 @@ export default function MemoryCard({ memory, onClick }: MemoryCardProps) {
     return icons[category] || '📌';
   };
 
+  // 根据索引选择渐变色
+  const gradients = [
+    'gradient-orange',
+    'gradient-blue',
+    'gradient-purple',
+    'gradient-pink',
+    'gradient-green',
+    'gradient-deep-blue',
+  ];
+  const gradientClass = gradients[index % 6];
+  const cardClassName = `memory-card ${gradientClass}`;
+
   return (
-    <View className="memory-card" onClick={handleClick}>
+    <View className={cardClassName} onClick={handleClick}>
       <View className="memory-header">
         <View className="period-badge">
           <Text>{formatPeriod(memory.period)}</Text>

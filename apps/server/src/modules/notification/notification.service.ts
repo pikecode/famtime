@@ -54,7 +54,7 @@ export class NotificationService {
       this.accessToken = data.access_token;
       this.tokenExpireTime = now + (data.expires_in - 300) * 1000; // 提前5分钟过期
 
-      return this.accessToken;
+      return this.accessToken as string;
     } catch (error) {
       this.logger.error('Failed to get access token', error);
       throw error;

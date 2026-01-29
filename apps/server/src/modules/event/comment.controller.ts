@@ -18,7 +18,7 @@ export class CommentController {
 
   // 创建评论
   @Post()
-  async create(@Request() req, @Body() dto: { eventId: string; content: string }) {
+  async create(@Request() req: any, @Body() dto: { eventId: string; content: string }) {
     // 临时使用 mock userId，实际应从 JWT token 获取
     const userId = req.user?.id || 'mock-user-id';
     return this.commentService.create(userId, dto);
@@ -26,14 +26,14 @@ export class CommentController {
 
   // 获取事件的所有评论
   @Get('event/:eventId')
-  async findByEvent(@Request() req, @Param('eventId') eventId: string) {
+  async findByEvent(@Request() req: any, @Param('eventId') eventId: string) {
     const userId = req.user?.id || 'mock-user-id';
     return this.commentService.findByEvent(userId, eventId);
   }
 
   // 删除评论
   @Delete(':id')
-  async delete(@Request() req, @Param('id') id: string) {
+  async delete(@Request() req: any, @Param('id') id: string) {
     const userId = req.user?.id || 'mock-user-id';
     return this.commentService.delete(userId, id);
   }

@@ -1,0 +1,56 @@
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 64rpx;
+  min-height: 400rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.8;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 16rpx;
+}
+
+.empty-description {
+  font-size: 28rpx;
+  color: #94A3B8;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 48rpx;
+  max-width: 500rpx;
+}
+
+.empty-action {
+  padding: 24rpx 48rpx;
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: white;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(59, 130, 246, 0.3);
+  transition: all 0.3s;
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: 0 4rpx 12rpx rgba(59, 130, 246, 0.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20rpx);
+  }
+}
