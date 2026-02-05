@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MemberRole } from '@prisma/client';
+import { AchievementService } from '../achievement/achievement.service';
 
 @Injectable()
 export class FamilyService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private achievementService: AchievementService,
+  ) {}
 
   // 生成邀请码
   private generateInviteCode(): string {
@@ -55,6 +59,9 @@ export class FamilyService {
         members: true,
       },
     });
+
+    // 检查成就
+    await this.achievementService.checkAchievement(userId, 'FAMILY_CREATED');
 
     return family;
   }
@@ -134,6 +141,9 @@ export class FamilyService {
         color: availableColor,
       },
     });
+
+    // 检查邀请成就（给邀请人）
+    await this.achievementService.checkAchievement(family.adminId, 'MEMBER_INVITED');
 
     return member;
   }

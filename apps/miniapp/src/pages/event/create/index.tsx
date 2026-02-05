@@ -6,7 +6,7 @@ import Button from '../../../components/Button';
 import Skeleton from '../../../components/Skeleton';
 import RecurrencePicker from '../../../components/RecurrencePicker';
 import EmptyState from '../../../components/EmptyState';
-import { createEvent as apiCreateEvent, getFamilyMembers } from '../../../services/api';
+import { createEvent as apiCreateEvent, updateEvent as apiUpdateEvent, getEvent, getFamilyMembers, getTemplates, useTemplate, createTemplate, EventTemplate } from '../../../services/api';
 import { useUserStore } from '../../../stores/user';
 import { handleError, showLoading, hideLoading, showSuccess } from '../../../utils/helpers';
 import './index.less';
@@ -31,6 +31,8 @@ const REMINDER_OPTIONS = [
 
 export default function EventCreatePage() {
   const router = useRouter();
+  const eventId = router.params.id; // 编辑模式时有值
+  const isEditMode = !!eventId;
   const initialDate = router.params.date || new Date().toISOString().split('T')[0];
 
   const [loading, setLoading] = useState(true);
@@ -46,26 +48,76 @@ export default function EventCreatePage() {
   const [assigneeId, setAssigneeId] = useState<string>('');
   const [selectedReminders, setSelectedReminders] = useState<number[]>([1440]);
   const [recurrence, setRecurrence] = useState<RecurrenceRule | undefined>();
+  const [templates, setTemplates] = useState<EventTemplate[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const selectedCategory = CATEGORIES.find((c) => c.value === category);
   const family = useUserStore((state) => state.family);
 
+  // 设置导航栏标题
   useEffect(() => {
-    const loadMembers = async () => {
+    if (isEditMode) {
+      Taro.setNavigationBarTitle({ title: '编辑日程' });
+    }
+  }, [isEditMode]);
+
+  useEffect(() => {
+    const loadData = async () => {
       if (family?.id) {
         try {
-          const familyMembers = await getFamilyMembers(family.id);
+          const [familyMembers, templateList] = await Promise.all([
+            getFamilyMembers(family.id),
+            getTemplates(family.id),
+          ]);
           setMembers(familyMembers);
+          setTemplates(templateList);
+
+          // 编辑模式：加载现有事件数据
+          if (isEditMode && eventId) {
+            const eventData = await getEvent(eventId);
+            setTitle(eventData.title);
+            setDescription(eventData.description || '');
+            setCategory(eventData.category);
+            setVisibility(eventData.visibility);
+            setIsAllDay(eventData.isAllDay);
+            setAssigneeId(eventData.assigneeId || '');
+
+            // 解析日期和时间
+            const startDate = new Date(eventData.startTime);
+            setDate(startDate.toISOString().split('T')[0]);
+            setStartTime(`${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`);
+
+            if (eventData.endTime) {
+              const endDate = new Date(eventData.endTime);
+              setEndTime(`${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`);
+            }
+
+            // 解析重复规则
+            if (eventData.isRecurring && eventData.recurrenceRule) {
+              setRecurrence({
+                type: eventData.recurrenceRule as any,
+                endDate: eventData.recurrenceEnd ? new Date(eventData.recurrenceEnd).toISOString().split('T')[0] : undefined,
+                count: eventData.recurrenceCount || undefined,
+              });
+            }
+
+            // 解析提醒设置
+            if (eventData.reminders && eventData.reminders.length > 0) {
+              setSelectedReminders(eventData.reminders.map((r: any) => r.beforeMinutes || 0));
+            }
+          }
         } catch (error) {
-          console.error('Failed to load family members:', error);
+          console.error('Failed to load data:', error);
+          if (isEditMode) {
+            Taro.showToast({ title: '加载事件失败', icon: 'none' });
+          }
         }
       }
       setLoading(false);
     };
 
-    // 模拟加载效果
-    setTimeout(loadMembers, 600);
-  }, [family]);
+    setTimeout(loadData, 300);
+  }, [family, eventId, isEditMode]);
 
   const handleDateChange = (e: any) => setDate(e.detail.value);
   const handleStartTimeChange = (e: any) => setStartTime(e.detail.value);
@@ -91,6 +143,66 @@ export default function EventCreatePage() {
   const handleMemberSelect = (id: string) => {
     Taro.vibrateShort({ type: 'light' });
     setAssigneeId(id === assigneeId ? '' : id);
+  };
+
+  // 应用模板
+  const handleApplyTemplate = async (template: EventTemplate) => {
+    Taro.vibrateShort({ type: 'medium' });
+    setShowTemplates(false);
+
+    try {
+      await useTemplate(template.id);
+      setTitle(template.title);
+      setDescription(template.description || '');
+      setCategory(template.category as EventCategory);
+      setVisibility(template.visibility as Visibility);
+      setIsAllDay(template.isAllDay);
+      setSelectedReminders(template.reminders.map(r => r.beforeMinutes || 0));
+
+      Taro.showToast({ title: '已应用模板', icon: 'success' });
+    } catch (e) {
+      console.error('Apply template failed', e);
+    }
+  };
+
+  // 保存为模板
+  const handleSaveAsTemplate = async () => {
+    if (!title.trim()) {
+      Taro.showToast({ title: '请先填写日程标题', icon: 'none' });
+      return;
+    }
+
+    Taro.showModal({
+      title: '保存为模板',
+      editable: true,
+      placeholderText: '请输入模板名称',
+      success: async (res) => {
+        if (res.confirm && res.content) {
+          try {
+            await createTemplate({
+              familyId: family!.id,
+              name: res.content,
+              title: title.trim(),
+              description: description.trim(),
+              isAllDay,
+              category,
+              visibility,
+              reminders: selectedReminders.map(val => ({
+                type: val === 0 ? 'AT_TIME' : 'BEFORE',
+                beforeMinutes: val
+              })),
+              isPublic: true,
+            });
+            Taro.showToast({ title: '模板已保存', icon: 'success' });
+            // 刷新模板列表
+            const templateList = await getTemplates(family!.id);
+            setTemplates(templateList);
+          } catch (e) {
+            Taro.showToast({ title: '保存失败', icon: 'none' });
+          }
+        }
+      },
+    });
   };
 
   const handleSubmit = async () => {
@@ -123,12 +235,12 @@ export default function EventCreatePage() {
     }
 
     try {
-      showLoading('正在保存...');
+      showLoading(isEditMode ? '正在更新...' : '正在保存...');
 
       const startDateTime = `${date}T${startTime}:00`;
       const endDateTime = isAllDay ? undefined : `${date}T${endTime}:00`;
 
-      await apiCreateEvent({
+      const eventData = {
         familyId: family.id,
         title: title.trim(),
         description: description.trim(),
@@ -143,15 +255,22 @@ export default function EventCreatePage() {
           type: val === 0 ? 'AT_TIME' : 'BEFORE',
           beforeMinutes: val
         })) as any
-      });
+      };
 
-      hideLoading();
-      showSuccess('创建成功');
+      if (isEditMode && eventId) {
+        await apiUpdateEvent(eventId, eventData);
+        hideLoading();
+        showSuccess('更新成功');
+      } else {
+        await apiCreateEvent(eventData);
+        hideLoading();
+        showSuccess('创建成功');
+      }
 
       setTimeout(() => Taro.navigateBack(), 1000);
     } catch (e) {
       hideLoading();
-      handleError(e, '保存失败');
+      handleError(e, isEditMode ? '更新失败' : '保存失败');
     }
   };
 
@@ -179,6 +298,33 @@ export default function EventCreatePage() {
 
   return (
     <View className="create-page">
+      {/* 模板快捷入口 */}
+      {!isEditMode && templates.length > 0 && (
+        <View className="template-section">
+          <View className="template-header" onClick={() => setShowTemplates(!showTemplates)}>
+            <Text className="template-title">📋 使用模板</Text>
+            <Text className="template-arrow">{showTemplates ? '收起' : '展开'}</Text>
+          </View>
+          {showTemplates && (
+            <ScrollView scrollX className="template-scroll" enhanced showScrollbar={false}>
+              <View className="template-list">
+                {templates.map((tpl) => (
+                  <View
+                    key={tpl.id}
+                    className="template-card"
+                    onClick={() => handleApplyTemplate(tpl)}
+                  >
+                    <Text className="tpl-name">{tpl.name}</Text>
+                    <Text className="tpl-title">{tpl.title}</Text>
+                    <Text className="tpl-usage">使用 {tpl.usageCount} 次</Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </View>
+      )}
+
       <View className="form-section">
         <View className="title-input-wrapper">
           <View
@@ -303,17 +449,22 @@ export default function EventCreatePage() {
       </View>
 
       <View className="form-section">
-        <Textarea 
-          className="memo-area" 
-          placeholder="补充更多细节..." 
-          value={description} 
-          onInput={(e) => setDescription(e.detail.value)} 
+        <Textarea
+          className="memo-area"
+          placeholder="补充更多细节..."
+          value={description}
+          onInput={(e) => setDescription(e.detail.value)}
         />
       </View>
 
       <View className="bottom-actions">
-        <Button type="primary" size="lg" className="w-full" onClick={handleSubmit}>
-          保存日程
+        {!isEditMode && (
+          <View className="save-template-btn" onClick={handleSaveAsTemplate}>
+            <Text>保存为模板</Text>
+          </View>
+        )}
+        <Button type="primary" size="lg" className="submit-btn" onClick={handleSubmit}>
+          {isEditMode ? '更新日程' : '保存日程'}
         </Button>
       </View>
     </View>

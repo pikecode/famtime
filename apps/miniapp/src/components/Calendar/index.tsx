@@ -1,5 +1,5 @@
 import { View, Text, Picker } from '@tarojs/components';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, memo, useCallback } from 'react';
 import Taro from '@tarojs/taro';
 import { EventColors, EventStatus } from '@famtime/shared';
 import { getLunarDisplay } from '../../utils/lunar';
@@ -29,7 +29,7 @@ const formatDate = (year: number, month: number, day: number) => {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 };
 
-export default function Calendar(props: CalendarProps) {
+export default memo(function Calendar(props: CalendarProps) {
   const {
     currentYear,
     currentMonth,
@@ -49,7 +49,7 @@ export default function Calendar(props: CalendarProps) {
   // 格式化为 YYYY-MM 格式供 Picker 使用
   const currentDateValue = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
 
-  const handleMonthPickerChange = (e) => {
+  const handleMonthPickerChange = useCallback((e) => {
     const value = e.detail.value; // 格式: YYYY-MM
     const [year, month] = value.split('-').map(Number);
 
@@ -58,12 +58,12 @@ export default function Calendar(props: CalendarProps) {
     }
 
     Taro.vibrateShort({ type: 'light' });
-  };
+  }, [onMonthChange]);
 
-  const handleMonthTextClick = () => {
+  const handleMonthTextClick = useCallback(() => {
     Taro.vibrateShort({ type: 'light' });
     setShowPicker(true);
-  };
+  }, []);
 
   const calendarDays = useMemo(() => {
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -90,22 +90,22 @@ export default function Calendar(props: CalendarProps) {
     return days;
   }, [currentYear, currentMonth]);
 
-  const handleDayClick = (day: number) => {
+  const handleDayClick = useCallback((day: number) => {
     if (day > 0 && day <= 100) {
       Taro.vibrateShort({ type: 'light' });
       onDayClick(day);
     }
-  };
+  }, [onDayClick]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     Taro.vibrateShort({ type: 'light' });
     onPrevMonth();
-  };
+  }, [onPrevMonth]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     Taro.vibrateShort({ type: 'light' });
     onNextMonth();
-  };
+  }, [onNextMonth]);
 
   const isToday = (day: number) => {
     const today = new Date();
@@ -167,7 +167,9 @@ export default function Calendar(props: CalendarProps) {
           }
           
           const lunar = getLunarDisplay(displayYear, displayMonth, actualDay);
-          const isFestival = ["春节", "元宵", "端午", "七夕", "中秋", "重阳", "腊八", "小年", "除夕"].includes(lunar);
+          const lunarFestivals = ["春节", "元宵", "端午", "七夕", "中秋", "重阳", "腊八", "小年", "除夕"];
+          const solarFestivals = ["元旦", "情人节", "妇女节", "植树节", "愚人节", "劳动节", "青年节", "儿童节", "建党节", "建军节", "教师节", "国庆节", "圣诞节"];
+          const isFestival = lunarFestivals.includes(lunar) || solarFestivals.includes(lunar);
 
           const dateStr = !isOtherMonth ? formatDate(currentYear, currentMonth, day) : '';
           const dayEvents = events[dateStr] || [];
@@ -202,4 +204,4 @@ export default function Calendar(props: CalendarProps) {
       </View>
     </View>
   );
-}
+});

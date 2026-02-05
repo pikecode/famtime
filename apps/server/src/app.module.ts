@@ -10,6 +10,9 @@ import { EventModule } from './modules/event/event.module';
 import { ReminderModule } from './modules/reminder/reminder.module';
 import { MemoryModule } from './modules/memory/memory.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { TemplateModule } from './modules/template/template.module';
+import { AchievementModule } from './modules/achievement/achievement.module';
+import { HealthModule } from './modules/health/health.module';
 import { DebugModule } from './modules/debug/debug.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
@@ -28,6 +31,9 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
     ReminderModule,
     MemoryModule,
     NotificationModule,
+    TemplateModule,
+    AchievementModule,
+    HealthModule,
     DebugModule,
   ],
   providers: [

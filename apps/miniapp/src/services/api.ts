@@ -10,10 +10,11 @@ import type {
   UpdateEventDto,
   QueryEventsDto,
 } from '@famtime/shared';
+import { cache, cachedFetch, generateCacheKey, CACHE_TTL } from '../utils/cache';
 
 const BASE_URL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:3000/api'
-  : 'https://your-domain.com/api';
+  : 'https://ompeak.com/api';
 
 // 请求拦截器 - 添加token
 function getHeaders() {
@@ -153,15 +154,33 @@ export async function removeMember(memberId: string) {
 // ============ 日程相关 ============
 
 export async function createEvent(data: CreateEventDto) {
-  return request<Event>('/event', {
+  const result = await request<Event>('/event', {
     method: 'POST',
     data,
   });
+  invalidateEventsCache();
+  invalidateAchievementsCache();
+  return result;
 }
 
 export async function getEvents(params: QueryEventsDto) {
   const query = new URLSearchParams(params as Record<string, string>).toString();
-  return request<Event[]>(`/events?${query}`);
+  const cacheKey = generateCacheKey('events', params);
+  return cachedFetch(
+    cacheKey,
+    () => request<Event[]>(`/events?${query}`),
+    CACHE_TTL.SHORT
+  );
+}
+
+export async function getPendingEvents(familyId: string) {
+  return request<Event[]>(`/events/pending?familyId=${familyId}`);
+}
+
+export async function searchEvents(familyId: string, keyword: string, limit = 20) {
+  return request<Event[]>(
+    `/events/search?familyId=${familyId}&keyword=${encodeURIComponent(keyword)}&limit=${limit}`
+  );
 }
 
 export async function getEvent(id: string) {
@@ -169,16 +188,20 @@ export async function getEvent(id: string) {
 }
 
 export async function updateEvent(id: string, data: UpdateEventDto) {
-  return request<Event>(`/event/${id}`, {
+  const result = await request<Event>(`/event/${id}`, {
     method: 'PUT',
     data,
   });
+  invalidateEventsCache();
+  return result;
 }
 
 export async function deleteEvent(id: string) {
-  return request<void>(`/event/${id}`, {
+  const result = await request<void>(`/event/${id}`, {
     method: 'DELETE',
   });
+  invalidateEventsCache();
+  return result;
 }
 
 export async function acceptEvent(id: string) {
@@ -240,4 +263,182 @@ export async function generateMonthlyMemory(familyId: string, year: number, mont
     method: 'POST',
     data: { familyId, year, month },
   });
+}
+
+// ============ 通知相关 ============
+
+export interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  content: string;
+  data?: Record<string, any>;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export async function getNotifications(limit = 50, offset = 0) {
+  return request<{ notifications: Notification[]; total: number }>(
+    `/notification/list?limit=${limit}&offset=${offset}`
+  );
+}
+
+export async function getUnreadNotificationCount() {
+  return request<{ count: number }>('/notification/unread-count');
+}
+
+export async function markNotificationAsRead(id: string) {
+  return request<void>(`/notification/${id}/read`, { method: 'POST' });
+}
+
+export async function markAllNotificationsAsRead() {
+  return request<void>('/notification/read-all', { method: 'POST' });
+}
+
+export async function deleteNotification(id: string) {
+  return request<void>(`/notification/${id}`, { method: 'DELETE' });
+}
+
+// ============ 模板相关 ============
+
+export interface EventTemplate {
+  id: string;
+  name: string;
+  title: string;
+  description?: string;
+  duration?: number;
+  isAllDay: boolean;
+  category: string;
+  visibility: string;
+  reminders: Array<{ type: string; beforeMinutes?: number }>;
+  isPublic: boolean;
+  usageCount: number;
+  createdAt: string;
+  creator: { id: string; nickname: string };
+}
+
+export async function getTemplates(familyId: string) {
+  return request<EventTemplate[]>(`/templates?familyId=${familyId}`);
+}
+
+export async function getTemplate(id: string) {
+  return request<EventTemplate>(`/templates/${id}`);
+}
+
+export async function createTemplate(data: {
+  familyId: string;
+  name: string;
+  title: string;
+  description?: string;
+  duration?: number;
+  isAllDay: boolean;
+  category: string;
+  visibility: string;
+  reminders: Array<{ type: string; beforeMinutes?: number }>;
+  isPublic: boolean;
+}) {
+  return request<EventTemplate>('/templates', {
+    method: 'POST',
+    data,
+  });
+}
+
+export async function updateTemplate(id: string, data: Partial<EventTemplate>) {
+  return request<EventTemplate>(`/templates/${id}`, {
+    method: 'PUT',
+    data,
+  });
+}
+
+export async function deleteTemplate(id: string) {
+  return request<void>(`/templates/${id}`, { method: 'DELETE' });
+}
+
+export async function useTemplate(id: string) {
+  return request<EventTemplate>(`/templates/${id}/use`, { method: 'POST' });
+}
+
+// ============ 导出相关 ============
+
+export async function exportEventsToICal(familyId: string, startDate: string, endDate: string) {
+  return request<{ content: string; filename: string }>(
+    `/events/export?familyId=${familyId}&startDate=${startDate}&endDate=${endDate}`
+  );
+}
+
+// ============ 成就相关 ============
+
+export interface Achievement {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  type: string;
+  target: number;
+  points: number;
+  order: number;
+  progress: number;
+  isCompleted: boolean;
+  completedAt: string | null;
+}
+
+export interface UserStats {
+  id: string;
+  userId: string;
+  totalEvents: number;
+  totalComments: number;
+  totalMemories: number;
+  eventsForOthers: number;
+  acceptedEvents: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastEventDate: string | null;
+  totalPoints: number;
+  birthdayEvents: number;
+  anniversaryEvents: number;
+  healthEvents: number;
+  familyActivityEvents: number;
+  reminderEvents: number;
+  otherEvents: number;
+}
+
+export async function getUserAchievements() {
+  return cachedFetch(
+    'achievements:user',
+    () => request<Achievement[]>('/achievements/user'),
+    CACHE_TTL.MEDIUM
+  );
+}
+
+export async function getUserStats() {
+  return cachedFetch(
+    'achievements:stats',
+    () => request<UserStats>('/achievements/stats'),
+    CACHE_TTL.MEDIUM
+  );
+}
+
+// ============ 缓存管理 ============
+
+/**
+ * 清除事件相关缓存（创建/更新/删除事件后调用）
+ */
+export function invalidateEventsCache() {
+  cache.deleteByPrefix('events');
+}
+
+/**
+ * 清除成就相关缓存
+ */
+export function invalidateAchievementsCache() {
+  cache.deleteByPrefix('achievements');
+}
+
+/**
+ * 清除所有缓存
+ */
+export function clearAllCache() {
+  cache.clear();
 }

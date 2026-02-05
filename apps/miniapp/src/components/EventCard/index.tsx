@@ -1,4 +1,5 @@
 import { View, Text } from '@tarojs/components';
+import { memo, useCallback } from 'react';
 import Taro from '@tarojs/taro';
 import { EventCategory, EventColors, EventStatus } from '@famtime/shared';
 import './index.less';
@@ -30,7 +31,7 @@ const categoryLabels: Record<EventCategory, string> = {
   [EventCategory.OTHER]: '其他',
 };
 
-export default function EventCard(props: EventCardProps) {
+export default memo(function EventCard(props: EventCardProps) {
   const {
     id,
     title,
@@ -45,10 +46,10 @@ export default function EventCard(props: EventCardProps) {
     onClick,
   } = props;
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     Taro.vibrateShort({ type: 'light' });
     onClick?.(id);
-  };
+  }, [id, onClick]);
 
   return (
     <View
@@ -94,4 +95,4 @@ export default function EventCard(props: EventCardProps) {
       <View className="event-arrow">›</View>
     </View>
   );
-}
+});

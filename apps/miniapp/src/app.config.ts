@@ -13,6 +13,7 @@ export default defineAppConfig({
     'pages/family/join/index',
     'pages/family/invite/index',
     'pages/notification/index',
+    'pages/achievement/index',
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -52,4 +53,6 @@ export default defineAppConfig({
       },
     ],
   },
+  // 按需注入
+  lazyCodeLoading: 'requiredComponents',
 });

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationType } from '@prisma/client';
 
 interface SubscriptionMessage {
   touser: string; // openid
@@ -8,6 +9,14 @@ interface SubscriptionMessage {
   page?: string;
   data: Record<string, { value: string }>;
   miniprogram_state?: 'developer' | 'trial' | 'formal';
+}
+
+interface CreateNotificationDto {
+  userId: string;
+  type: NotificationType;
+  title: string;
+  content: string;
+  data?: Record<string, any>;
 }
 
 @Injectable()
@@ -154,9 +163,10 @@ export class NotificationService {
         user.openid,
         templateId,
         {
-          thing1: eventTitle.slice(0, 20), // 日程标题，最多20个字符
-          time2: eventTime, // 提醒时间
-          thing3: '请及时查看日程详情', // 温馨提示
+          thing1: eventTitle.slice(0, 20), // 日程主题，最多20个字符
+          date2: eventTime, // 日程时间
+          thing3: '请及时查看日程详情', // 日程描述
+          thing4: '点击查看详情', // 温馨提示
         },
         `pages/event/detail/index?id=${eventId}`,
       );
@@ -193,13 +203,17 @@ export class NotificationService {
         return false;
       }
 
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
       return this.sendSubscriptionMessage(
         user.openid,
         templateId,
         {
-          thing1: familyName.slice(0, 20), // 家庭名称
-          name2: inviterName.slice(0, 20), // 邀请人
-          character_string3: inviteCode, // 邀请码
+          thing1: inviterName.slice(0, 20), // 邀请人
+          time2: timeStr, // 添加时间
+          phone_number3: '10000000000', // 手机号（占位）
+          thing4: `邀请码: ${inviteCode}，加入${familyName}`, // 温馨提示
         },
         `pages/family/join/index?code=${inviteCode}`,
       );
@@ -236,13 +250,17 @@ export class NotificationService {
         return false;
       }
 
+      const now = new Date();
+      const createTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
       return this.sendSubscriptionMessage(
         user.openid,
         templateId,
         {
-          thing1: `${period} 月度回忆录`, // 标题
-          number2: eventCount.toString(), // 事件数量
-          thing3: '点击查看本月精彩瞬间', // 提示
+          date1: createTime, // 创建时间
+          thing2: `${period} 月度回忆录已生成`, // 报告简介
+          time3: period, // 时间周期
+          character_string4: `${eventCount}个精彩时刻`, // 事件数量
         },
         `pages/memory/detail/index?id=${memoryId}`,
       );
@@ -250,5 +268,77 @@ export class NotificationService {
       this.logger.error('Error sending monthly memory', error);
       return false;
     }
+  }
+
+  // ============ 通知记录管理 ============
+
+  /**
+   * 创建通知记录
+   */
+  async createNotification(dto: CreateNotificationDto) {
+    return this.prisma.notification.create({
+      data: {
+        userId: dto.userId,
+        type: dto.type,
+        title: dto.title,
+        content: dto.content,
+        data: dto.data || {},
+      },
+    });
+  }
+
+  /**
+   * 获取用户通知列表
+   */
+  async getUserNotifications(userId: string, limit = 50, offset = 0) {
+    const [notifications, total] = await Promise.all([
+      this.prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.notification.count({ where: { userId } }),
+    ]);
+
+    return { notifications, total };
+  }
+
+  /**
+   * 获取未读通知数量
+   */
+  async getUnreadCount(userId: string) {
+    return this.prisma.notification.count({
+      where: { userId, isRead: false },
+    });
+  }
+
+  /**
+   * 标记通知为已读
+   */
+  async markAsRead(userId: string, notificationId: string) {
+    return this.prisma.notification.updateMany({
+      where: { id: notificationId, userId },
+      data: { isRead: true },
+    });
+  }
+
+  /**
+   * 标记所有通知为已读
+   */
+  async markAllAsRead(userId: string) {
+    return this.prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true },
+    });
+  }
+
+  /**
+   * 删除通知
+   */
+  async deleteNotification(userId: string, notificationId: string) {
+    return this.prisma.notification.deleteMany({
+      where: { id: notificationId, userId },
+    });
   }
 }

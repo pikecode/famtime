@@ -2,7 +2,7 @@ import { View, Text, Switch } from '@tarojs/components';
 import { useState, useEffect } from 'react';
 import Taro from '@tarojs/taro';
 import { useUserStore } from '../../stores/user';
-import { getProfile } from '../../services/api';
+import { getProfile, exportEventsToICal, getUserStats, UserStats } from '../../services/api';
 import './index.less';
 
 export default function ProfilePage() {
@@ -14,10 +14,12 @@ export default function ProfilePage() {
     enableReminder: true,
     quietHours: true,
   });
+  const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
     // 加载用户信息
     loadUserProfile();
+    loadUserStats();
   }, []);
 
   const loadUserProfile = async () => {
@@ -26,6 +28,15 @@ export default function ProfilePage() {
       console.log('Profile loaded:', profile);
     } catch (error) {
       console.error('Failed to load profile:', error);
+    }
+  };
+
+  const loadUserStats = async () => {
+    try {
+      const statsData = await getUserStats();
+      setStats(statsData);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
     }
   };
 
@@ -53,12 +64,57 @@ export default function ProfilePage() {
     });
   };
 
+  const handleExportData = async () => {
+    if (!family?.id) {
+      Taro.showToast({ title: '请先加入家庭', icon: 'none' });
+      return;
+    }
+
+    Taro.vibrateShort({ type: 'light' });
+
+    try {
+      Taro.showLoading({ title: '导出中...' });
+
+      // 导出最近一年的数据
+      const now = new Date();
+      const startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+        .toISOString().split('T')[0];
+      const endDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate())
+        .toISOString().split('T')[0];
+
+      const result = await exportEventsToICal(family.id, startDate, endDate);
+
+      Taro.hideLoading();
+
+      // 在小程序中，我们可以将内容复制到剪贴板或显示给用户
+      Taro.setClipboardData({
+        data: result.content,
+        success: () => {
+          Taro.showModal({
+            title: '导出成功',
+            content: 'iCal 日历数据已复制到剪贴板，您可以粘贴到其他日历应用中导入。',
+            showCancel: false,
+          });
+        },
+      });
+    } catch (e) {
+      Taro.hideLoading();
+      Taro.showToast({ title: '导出失败', icon: 'none' });
+    }
+  };
+
   const menuItems = [
     {
       title: '消息通知',
       desc: '管理消息推送设置',
       icon: '🔔',
       onClick: () => Taro.navigateTo({ url: '/pages/notification/index' }),
+    },
+    {
+      title: '导出日历',
+      desc: '导出为 iCal 格式',
+      icon: '📤',
+      onClick: handleExportData,
     },
     {
       title: '家庭设置',
@@ -93,6 +149,38 @@ export default function ProfilePage() {
       </View>
 
       <View className="content-area">
+        {/* 成就入口 */}
+        <View
+          className="achievement-entry"
+          onClick={() => {
+            Taro.vibrateShort({ type: 'light' });
+            Taro.navigateTo({ url: '/pages/achievement/index' });
+          }}
+        >
+          <View className="achievement-header">
+            <Text className="achievement-title">🏆 我的成就</Text>
+            <Text className="achievement-points">{stats?.totalPoints || 0} 积分</Text>
+          </View>
+          <View className="achievement-stats">
+            <View className="stat-item">
+              <Text className="stat-value">{stats?.totalEvents || 0}</Text>
+              <Text className="stat-label">日程</Text>
+            </View>
+            <View className="stat-item">
+              <Text className="stat-value">{stats?.currentStreak || 0}</Text>
+              <Text className="stat-label">连续</Text>
+            </View>
+            <View className="stat-item">
+              <Text className="stat-value">{stats?.totalMemories || 0}</Text>
+              <Text className="stat-label">回忆</Text>
+            </View>
+          </View>
+          <View className="achievement-action">
+            <Text className="action-text">查看全部成就</Text>
+            <Text className="menu-arrow">›</Text>
+          </View>
+        </View>
+
         {/* 快捷开关 */}
         <View className="section-card">
           <View className="setting-item">

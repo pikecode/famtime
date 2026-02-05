@@ -1,5 +1,12 @@
 import Taro from '@tarojs/taro';
 
+// 微信订阅消息模板 ID
+const TEMPLATE_IDS = {
+  EVENT_REMINDER: 'brNpHCtsdA2PAG3VH_z6FEOkbEvOnYLnsqCx1stjI-k',
+  FAMILY_INVITE: 'aHaWjfjUvjYJKou5tfGGjx7FiqTEJRBOWlaFEZ_zRHY',
+  MONTHLY_MEMORY: '6K5gaJmMnrQe2uTN1gbDPpv08oUUc_nzptElHrbuyLc',
+};
+
 /**
  * 请求订阅消息权限
  * @param templateIds 模板 ID 数组
@@ -44,36 +51,30 @@ export async function requestSubscribeMessage(
  * 请求日程提醒权限
  */
 export async function requestEventReminderPermission(): Promise<boolean> {
-  // 这里需要替换为实际的模板 ID
-  const templateId = 'your-event-reminder-template-id';
-  return requestSubscribeMessage([templateId]);
+  return requestSubscribeMessage([TEMPLATE_IDS.EVENT_REMINDER]);
 }
 
 /**
  * 请求家庭邀请通知权限
  */
 export async function requestFamilyInvitePermission(): Promise<boolean> {
-  const templateId = 'your-family-invite-template-id';
-  return requestSubscribeMessage([templateId]);
+  return requestSubscribeMessage([TEMPLATE_IDS.FAMILY_INVITE]);
 }
 
 /**
  * 请求月度回忆通知权限
  */
 export async function requestMonthlyMemoryPermission(): Promise<boolean> {
-  const templateId = 'your-monthly-memory-template-id';
-  return requestSubscribeMessage([templateId]);
+  return requestSubscribeMessage([TEMPLATE_IDS.MONTHLY_MEMORY]);
 }
 
 /**
  * 一次性请求所有通知权限
  */
 export async function requestAllNotificationPermissions(): Promise<boolean> {
-  const templateIds = [
-    'your-event-reminder-template-id',
-    'your-family-invite-template-id',
-    'your-monthly-memory-template-id',
-  ];
-
-  return requestSubscribeMessage(templateIds);
+  return requestSubscribeMessage([
+    TEMPLATE_IDS.EVENT_REMINDER,
+    TEMPLATE_IDS.FAMILY_INVITE,
+    TEMPLATE_IDS.MONTHLY_MEMORY,
+  ]);
 }

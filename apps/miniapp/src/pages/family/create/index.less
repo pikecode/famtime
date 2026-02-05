@@ -50,7 +50,9 @@
 }
 
 .form-item {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
 
   &:last-child {
     margin-bottom: 0;
@@ -61,18 +63,22 @@
   font-size: 28px;
   font-weight: 500;
   color: #212529;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: block;
+  flex-shrink: 0;
 }
 
 .name-input {
   width: 100%;
+  min-height: 96px;
   padding: 24px;
   background: #F8F9FA;
   border-radius: 12px;
   font-size: 32px;
   color: #212529;
   box-sizing: border-box;
+  line-height: 1.5;
+  display: block;
 }
 
 .placeholder {

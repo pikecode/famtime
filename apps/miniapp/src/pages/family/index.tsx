@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { MemberRole, FamilyMember, Event } from '@famtime/shared';
 import { useUserStore } from '../../stores/user';
-import { getFamilyMembers, getEvents } from '../../services/api';
+import { getFamilyMembers, getPendingEvents, acceptEvent, rejectEvent } from '../../services/api';
 import './index.less';
 
 export default function FamilyPage() {
@@ -25,7 +25,7 @@ export default function FamilyPage() {
     try {
       const [membersData, eventsData] = await Promise.all([
         getFamilyMembers(family!.id),
-        getEvents({ familyId: family!.id, startDate: '2020-01-01', endDate: '2030-12-31', status: 'pending' as any })
+        getPendingEvents(family!.id)
       ]);
       setMembers(membersData);
       setPendingEvents(eventsData);
@@ -55,18 +55,28 @@ export default function FamilyPage() {
     Taro.navigateTo({ url: `/pages/event/detail/index?id=${eventId}` });
   };
 
-  const handleAcceptEvent = (eventId: string, e: any) => {
+  const handleAcceptEvent = async (eventId: string, e: any) => {
     e.stopPropagation();
     Taro.vibrateShort({ type: 'medium' });
-    Taro.showToast({ title: '已接受', icon: 'success' });
-    fetchFamilyData();
+    try {
+      await acceptEvent(eventId);
+      Taro.showToast({ title: '已接受', icon: 'success' });
+      fetchFamilyData();
+    } catch (error: any) {
+      Taro.showToast({ title: error.message || '操作失败', icon: 'none' });
+    }
   };
 
-  const handleRejectEvent = (eventId: string, e: any) => {
+  const handleRejectEvent = async (eventId: string, e: any) => {
     e.stopPropagation();
     Taro.vibrateShort({ type: 'light' });
-    Taro.showToast({ title: '已拒绝', icon: 'none' });
-    fetchFamilyData();
+    try {
+      await rejectEvent(eventId);
+      Taro.showToast({ title: '已拒绝', icon: 'none' });
+      fetchFamilyData();
+    } catch (error: any) {
+      Taro.showToast({ title: error.message || '操作失败', icon: 'none' });
+    }
   };
 
   // 调试辅助：模拟加入家庭

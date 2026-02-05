@@ -1,13 +1,14 @@
 import { View, Text, ScrollView } from '@tarojs/components';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Taro, { useDidShow } from '@tarojs/taro';
 import { EventStatus, Event, EventCategory } from '@famtime/shared';
 import Calendar from '../../components/Calendar';
 import EventCard from '../../components/EventCard';
 import Skeleton from '../../components/Skeleton';
 import SearchBar, { SearchFilters } from '../../components/SearchBar';
-import { getEvents } from '../../services/api';
+import { getEvents, searchEvents } from '../../services/api';
 import { useUserStore } from '../../stores/user';
+import { useDebouncedCallback } from '../../hooks/useDebounce';
 import './index.less';
 
 // ============ 工具函数 ============
@@ -25,6 +26,9 @@ export default function CalendarPage() {
   );
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [searchResults, setSearchResults] = useState<Event[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const family = useUserStore((state) => state.family);
 
@@ -73,6 +77,37 @@ export default function CalendarPage() {
     }
   };
 
+  // 搜索事件（带防抖）
+  const doSearch = useCallback(async (keyword: string) => {
+    if (!keyword.trim()) {
+      setIsSearching(false);
+      setSearchResults([]);
+      return;
+    }
+
+    if (!family?.id) return;
+
+    setIsSearching(true);
+    setSearchLoading(true);
+
+    try {
+      const results = await searchEvents(family.id, keyword.trim());
+      setSearchResults(results);
+    } catch (e) {
+      console.error('Search failed', e);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [family?.id]);
+
+  // 使用防抖包装搜索函数
+  const debouncedSearch = useDebouncedCallback(doSearch, 300);
+
+  const handleSearch = useCallback((keyword: string) => {
+    setSearchKeyword(keyword);
+    debouncedSearch(keyword);
+  }, [debouncedSearch]);
+
   const selectedDateEvents = useMemo(() => {
     let events = eventsMap[selectedDate] || [];
 
@@ -91,81 +126,114 @@ export default function CalendarPage() {
     return events;
   }, [eventsMap, selectedDate, searchKeyword, filters]);
 
-  const handlePrevMonth = () => {
+  const handlePrevMonth = useCallback(() => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
       setCurrentYear(currentYear - 1);
     } else {
       setCurrentMonth(currentMonth - 1);
     }
-  };
+  }, [currentMonth, currentYear]);
 
-  const handleNextMonth = () => {
+  const handleNextMonth = useCallback(() => {
     if (currentMonth === 11) {
       setCurrentMonth(0);
       setCurrentYear(currentYear + 1);
     } else {
       setCurrentMonth(currentMonth + 1);
     }
-  };
+  }, [currentMonth, currentYear]);
 
-  const handleToday = () => {
+  const handleToday = useCallback(() => {
     const today = new Date();
     Taro.vibrateShort({ type: 'medium' });
     setCurrentYear(today.getFullYear());
     setCurrentMonth(today.getMonth());
     setSelectedDate(formatDate(today.getFullYear(), today.getMonth(), today.getDate()));
-  };
+  }, []);
 
-  const handleMonthChange = (year: number, month: number) => {
+  const handleMonthChange = useCallback((year: number, month: number) => {
     setCurrentYear(year);
     setCurrentMonth(month);
     // 选中该月的第一天
     setSelectedDate(formatDate(year, month, 1));
-  };
+  }, []);
 
-  const handleDayClick = (day: number) => {
+  const handleDayClick = useCallback((day: number) => {
     setSelectedDate(formatDate(currentYear, currentMonth, day));
-  };
+  }, [currentYear, currentMonth]);
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = useCallback(() => {
     Taro.vibrateShort({ type: 'medium' });
     Taro.navigateTo({ url: `/pages/event/create/index?date=${selectedDate}` });
-  };
+  }, [selectedDate]);
 
-  const handleEventClick = (eventId: string) => {
+  const handleEventClick = useCallback((eventId: string) => {
     Taro.navigateTo({ url: `/pages/event/detail/index?id=${eventId}` });
-  };
+  }, []);
 
   return (
     <View className="calendar-page">
       {/* 搜索栏 */}
       <SearchBar
-        onSearch={setSearchKeyword}
+        onSearch={handleSearch}
         onFilterChange={setFilters}
       />
 
-      <View className="top-section">
-        {loading ? (
-          <View className="calendar-skeleton">
-            <Skeleton height={600} width="100%" />
+      {/* 搜索结果模式 */}
+      {isSearching ? (
+        <View className="search-results-section">
+          <View className="search-header">
+            <Text className="search-title">搜索结果</Text>
+            <Text className="search-count">
+              {searchLoading ? '搜索中...' : `找到 ${searchResults.length} 条结果`}
+            </Text>
           </View>
-        ) : (
-          <Calendar
-            currentYear={currentYear}
-            currentMonth={currentMonth}
-            selectedDate={selectedDate}
-            events={eventsMap}
-            onDayClick={handleDayClick}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            onTodayClick={handleToday}
-            onMonthChange={handleMonthChange}
-          />
-        )}
-      </View>
+          {searchLoading ? (
+            <View className="loading-state">
+              <Text>搜索中...</Text>
+            </View>
+          ) : searchResults.length === 0 ? (
+            <View className="empty-state">
+              <Text className="empty-icon">🔍</Text>
+              <Text className="empty-text">未找到相关日程</Text>
+            </View>
+          ) : (
+            <ScrollView scrollY className="search-results-list">
+              {searchResults.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => handleEventClick(event.id)}
+                />
+              ))}
+            </ScrollView>
+          )}
+        </View>
+      ) : (
+        <>
+          {/* 正常日历模式 */}
+          <View className="top-section">
+            {loading ? (
+              <View className="calendar-skeleton">
+                <Skeleton height={600} width="100%" />
+              </View>
+            ) : (
+              <Calendar
+                currentYear={currentYear}
+                currentMonth={currentMonth}
+                selectedDate={selectedDate}
+                events={eventsMap}
+                onDayClick={handleDayClick}
+                onPrevMonth={handlePrevMonth}
+                onNextMonth={handleNextMonth}
+                onTodayClick={handleToday}
+                onMonthChange={handleMonthChange}
+              />
+            )}
+          </View>
 
-      <View className="event-section">
+          <View className="event-section">
         <View className="section-header">
           <View className="title-area">
             <Text className="section-title">
@@ -233,6 +301,8 @@ export default function CalendarPage() {
         <View className="fab-button" onClick={handleCreateEvent}>
           <Text className="fab-plus">+</Text>
         </View>
+      )}
+        </>
       )}
     </View>
   );

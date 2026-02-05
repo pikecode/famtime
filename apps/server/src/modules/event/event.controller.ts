@@ -165,6 +165,28 @@ export class EventController {
     };
   }
 
+  @Get('events/search')
+  @UseGuards(FamilyMemberGuard)
+  async searchEvents(
+    @Request() req: any,
+    @Query('familyId') familyId: string,
+    @Query('keyword') keyword: string,
+    @FamilyMember() member: any,
+    @Query('limit') limit?: string,
+  ) {
+    const events = await this.eventService.searchEvents(
+      req.user.id,
+      familyId,
+      keyword,
+      limit ? parseInt(limit) : 20,
+    );
+    return {
+      code: 0,
+      message: 'success',
+      data: events,
+    };
+  }
+
   @Get('event/:id')
   async findOne(@Request() req: any, @Param('id') id: string) {
     const event = await this.eventService.findById(req.user.id, id);
@@ -215,6 +237,31 @@ export class EventController {
       code: 0,
       message: 'success',
       data: event,
+    };
+  }
+
+  @Get('events/export')
+  @UseGuards(FamilyMemberGuard)
+  async exportEvents(
+    @Request() req: any,
+    @Query('familyId') familyId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @FamilyMember() member: any,
+  ) {
+    const icalContent = await this.eventService.exportToICal(
+      req.user.id,
+      familyId,
+      startDate,
+      endDate,
+    );
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        content: icalContent,
+        filename: `famtime-events-${startDate}-${endDate}.ics`,
+      },
     };
   }
 }

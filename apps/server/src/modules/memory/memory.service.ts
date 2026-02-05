@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MemoryType, EventCategory } from '@prisma/client';
+import { AchievementService } from '../achievement/achievement.service';
 
 @Injectable()
 export class MemoryService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private achievementService: AchievementService,
+  ) {}
 
   /**
    * 生成月度回忆录
@@ -64,6 +68,15 @@ export class MemoryService {
         highlights: highlights as any,
       },
     });
+
+    // 获取家庭成员并更新成就
+    const members = await this.prisma.familyMember.findMany({
+      where: { familyId },
+    });
+    for (const member of members) {
+      await this.achievementService.updateStatsOnMemoryCreated(member.userId);
+      await this.achievementService.checkAchievement(member.userId, 'MEMORY_CREATED');
+    }
 
     return memory;
   }

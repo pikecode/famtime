@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AchievementService } from '../achievement/achievement.service';
 
 interface CreateCommentDto {
   eventId: string;
@@ -12,7 +13,10 @@ interface CreateCommentDto {
 
 @Injectable()
 export class CommentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private achievementService: AchievementService,
+  ) {}
 
   // 创建评论
   async create(userId: string, dto: CreateCommentDto) {
@@ -52,6 +56,10 @@ export class CommentService {
         },
       },
     });
+
+    // 更新成就统计
+    await this.achievementService.updateStatsOnCommentCreated(userId);
+    await this.achievementService.checkAchievement(userId, 'COMMENT_CREATED');
 
     return comment;
   }

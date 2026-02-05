@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+**/dist
+.next
+.nuxt
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (use docker-compose env)
+.env
+.env.local
+.env.*.local
+
+# Test
+coverage
+.nyc_output
+
+# Miniapp (not needed for server deployment)
+apps/miniapp
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Deploy folder (avoid recursive copy)
+deploy
+
+# Misc
+.editorconfig
+.eslintrc*
+.prettierrc*
+tsconfig.tsbuildinfo

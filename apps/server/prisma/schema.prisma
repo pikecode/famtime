@@ -25,6 +25,10 @@ model User {
   assignedEvents  Event[]        @relation("EventAssignee")
   reminderPrefs   ReminderPreference?
   comments        EventComment[]
+  notifications   Notification[]
+  templates       EventTemplate[]
+  achievements    UserAchievement[]
+  stats           UserStats?
 
   @@map("users")
 }
@@ -48,6 +52,7 @@ model Family {
   members FamilyMember[]
   events  Event[]
   memories FamilyMemory[]
+  templates EventTemplate[]
 
   @@map("families")
 }
@@ -187,6 +192,50 @@ model FamilyMemory {
   @@map("family_memories")
 }
 
+// 通知记录表
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  content   String
+  data      Json?            // 额外数据，如 eventId, familyId 等
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // 关系
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+// 日程模板表
+model EventTemplate {
+  id          String        @id @default(cuid())
+  name        String                        // 模板名称
+  title       String                        // 日程标题
+  description String?                       // 描述
+  duration    Int?                          // 持续时间（分钟）
+  isAllDay    Boolean       @default(false) // 是否全天
+  category    EventCategory @default(OTHER) // 分类
+  visibility  Visibility    @default(FAMILY) // 可见性
+  reminders   Json          @default("[]")  // 提醒设置
+  isPublic    Boolean       @default(false) // 是否公开（家庭共享）
+  usageCount  Int           @default(0)     // 使用次数
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // 关系
+  familyId String
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  creatorId String
+  creator   User   @relation(fields: [creatorId], references: [id])
+
+  @@index([familyId, isPublic])
+  @@map("event_templates")
+}
+
 // 枚举类型
 enum MemberRole {
   ADMIN
@@ -223,4 +272,93 @@ enum MemoryType {
   MONTHLY
   YEARLY
   ANNIVERSARY
+}
+
+enum NotificationType {
+  EVENT_REMINDER    // 日程提醒
+  EVENT_INVITE      // 日程邀请
+  FAMILY_INVITE     // 家庭邀请
+  MONTHLY_MEMORY    // 月度回忆
+  SYSTEM            // 系统通知
+}
+
+// 成就定义表
+model Achievement {
+  id          String              @id @default(cuid())
+  key         String              @unique
+  name        String
+  description String
+  icon        String
+  category    AchievementCategory
+  type        AchievementType
+  target      Int
+  points      Int                 @default(10)
+  order       Int                 @default(0)
+  createdAt   DateTime            @default(now())
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+// 用户成就表
+model UserAchievement {
+  id            String    @id @default(cuid())
+  userId        String
+  achievementId String
+  progress      Int       @default(0)
+  isCompleted   Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId, isCompleted])
+  @@map("user_achievements")
+}
+
+// 用户统计表
+model UserStats {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  totalEvents     Int       @default(0)
+  totalComments   Int       @default(0)
+  totalMemories   Int       @default(0)
+  eventsForOthers Int       @default(0)
+  acceptedEvents  Int       @default(0)
+  currentStreak   Int       @default(0)
+  longestStreak   Int       @default(0)
+  lastEventDate   DateTime?
+  totalPoints     Int       @default(0)
+  // 分类统计
+  birthdayEvents       Int @default(0)
+  anniversaryEvents    Int @default(0)
+  healthEvents         Int @default(0)
+  familyActivityEvents Int @default(0)
+  reminderEvents       Int @default(0)
+  otherEvents          Int @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_stats")
+}
+
+enum AchievementCategory {
+  ONBOARDING
+  EVENT
+  FAMILY
+  STREAK
+  MEMORY
+  SPECIAL
+}
+
+enum AchievementType {
+  ONE_TIME
+  CUMULATIVE
+  STREAK
 }

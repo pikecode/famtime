@@ -413,30 +413,117 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 48rpx;
-  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  padding: 32rpx 48rpx;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(40rpx);
   z-index: 100;
+  display: flex;
+  gap: 24rpx;
+  align-items: center;
+}
+
+.save-template-btn {
+  padding: 24rpx 32rpx;
+  background: #F1F5F9;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  color: #64748B;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &:active {
+    background: #E2E8F0;
+  }
 }
 
 .submit-btn {
-  height: 112rpx;
+  flex: 1;
+  height: 96rpx;
   background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
-  border-radius: 56rpx;
-  font-size: 36rpx;
-  font-weight: 800;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 700;
   color: white;
-  box-shadow:
-    0 24rpx 48rpx rgba(59, 130, 246, 0.4),
-    0 0 0 1rpx rgba(255, 255, 255, 0.3);
+  box-shadow: 0 16rpx 32rpx rgba(59, 130, 246, 0.3);
 
   &:active {
     transform: translateY(4rpx);
-    box-shadow:
-      0 16rpx 32rpx rgba(59, 130, 246, 0.3),
-      0 0 0 1rpx rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8rpx 16rpx rgba(59, 130, 246, 0.2);
   }
+}
+
+// 模板区域
+.template-section {
+  background: #fff;
+  margin: 24rpx 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.template-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
+}
+
+.template-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0369A1;
+}
+
+.template-arrow {
+  font-size: 24rpx;
+  color: #0EA5E9;
+}
+
+.template-scroll {
+  white-space: nowrap;
+}
+
+.template-list {
+  display: inline-flex;
+  gap: 20rpx;
+  padding: 24rpx 32rpx;
+}
+
+.template-card {
+  display: inline-flex;
+  flex-direction: column;
+  width: 240rpx;
+  padding: 24rpx;
+  background: #F8FAFC;
+  border-radius: 16rpx;
+  border: 2rpx solid #E2E8F0;
+
+  &:active {
+    background: #E0F2FE;
+    border-color: #0EA5E9;
+  }
+}
+
+.tpl-name {
+  font-size: 24rpx;
+  color: #64748B;
+  margin-bottom: 8rpx;
+}
+
+.tpl-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1E293B;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tpl-usage {
+  font-size: 22rpx;
+  color: #94A3B8;
 }
 
 .loading .skeleton {

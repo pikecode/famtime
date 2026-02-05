@@ -43,10 +43,33 @@ const lunarFestivals: Record<string, string> = {
   "1230": "除夕",
 };
 
+// 公历节日
+const solarFestivals: Record<string, string> = {
+  "0101": "元旦",
+  "0214": "情人节",
+  "0308": "妇女节",
+  "0312": "植树节",
+  "0401": "愚人节",
+  "0501": "劳动节",
+  "0504": "青年节",
+  "0601": "儿童节",
+  "0701": "建党节",
+  "0801": "建军节",
+  "0910": "教师节",
+  "1001": "国庆节",
+  "1225": "圣诞节",
+};
+
 /**
  * 获取指定日期的农历显示文本
  */
 export function getLunarDisplay(year: number, month: number, day: number): string {
+  // 先检查公历节日
+  const solarKey = `${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+  if (solarFestivals[solarKey]) {
+    return solarFestivals[solarKey];
+  }
+
   const date = new Date(year, month - 1, day);
   const baseDate = new Date(1900, 0, 31);
   let offset = Math.floor((date.getTime() - baseDate.getTime()) / 86400000);
